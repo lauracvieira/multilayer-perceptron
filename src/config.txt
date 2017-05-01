@@ -1,0 +1,19 @@
+Execucao em 01/05/2017 16:46 
+
+extrator: HOG
+extrator_orientacoes: 
+extrator_pixel_por_celula: 
+extrator_celula_por_bloco: 
+
+extrator: LBP 
+extrator_orientacoes: 
+extrator_pixel_por_celula: 
+extrator_celula_por_bloco: 
+
+rede_alpha: 1.0
+rede_camada_1_neuronios: 4
+rede_camada_1_funcao_ativacao: sigmoide
+rede_camada_2_neuronios: 1
+rede_camada_0_funcao_ativacao: sigmoide
+rede_inicializacao_pesos: aleatoria
+rede_max_epocas: 100000
