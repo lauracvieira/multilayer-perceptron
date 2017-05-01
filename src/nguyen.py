@@ -16,6 +16,5 @@ def initnw(inputs,outputs):
 
 def nguyen(inputs,outputs):
     neww = []
-    'for i in range(outputs):'
     neww = initnw(inputs,outputs)
     return neww.T;
