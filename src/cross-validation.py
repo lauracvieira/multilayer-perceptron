@@ -1,4 +1,5 @@
 import os
+import perceptron as mlp
 
 def classes(path):
 	"""
@@ -59,11 +60,9 @@ def kfold(dataset):
 		for dataset_j in range(len(dataset)):
 			testing_this_round = testing_this_round + dataset[dataset_j][fold_i*subset_size:][:subset_size]      
 			training_this_round = training_this_round + dataset[dataset_j][:fold_i*subset_size] + dataset[dataset_j][(fold_i+1)*subset_size:]
-
-			# Ainda dentro do for - para CADA rodada do k-fold:
-			# todo: chamar método de validaçao com o parâmetro testing_this_round
-			# todo: chamar método de validaçao com o parâmetro training_this_round
-			# todo: salvar acurácia
+		
+		mlp.run()
+			
 		
 
 		# ####################################################################### TESTES kfold INÍCIO
