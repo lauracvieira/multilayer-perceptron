@@ -20,16 +20,18 @@ def crop(img, new_height, new_width):
    cImg = img[top:bottom, left:right]
    return cImg
 
+def getImage(file):
+	image = imread(file)
+	image = crop(image, 64, 64)
+	image = color.rgb2gray(image)
+
 def getImages(path):
 	files = []
 
    	for f in listdir(path):
    		file = join(path, f)
    		if isfile(file):
-   			image = imread(file)
-   			image = crop(image, 64, 64)
-   			image = color.rgb2gray(image)
-   			files.append(image)
+   			files.append(getImage(file))
 	return files;
 
 def calculateHog(image):
