@@ -1,5 +1,5 @@
 import os
-import perceptron as mlp
+import perceptron
 import argparse
 
 def classes(path):
@@ -42,7 +42,7 @@ def dataset(classes):
 
 	return dataset
 
-def kfold(dataset, classes_num, descriptor):
+def kfold(dataset, mlp):
 	"""
 	Validação cruzada utilizando o mé todo k-fold
 	:Parameters:
@@ -62,12 +62,10 @@ def kfold(dataset, classes_num, descriptor):
 			testing_this_round = testing_this_round + dataset[dataset_j][fold_i*subset_size:][:subset_size]      
 			training_this_round = training_this_round + dataset[dataset_j][:fold_i*subset_size] + dataset[dataset_j][(fold_i+1)*subset_size:]
 		
-		mlp.run(training_this_round, testing_this_round, classes_num, descriptor)
-		##TO-DO: COMO DEVERIA SER:::::::
-		#training_this_round = dataset1, dataset2, dataset3, dataset4
-		#mlp.run(training_this_round, testing_this_round)
-		
 
+
+		mlp.run(training_this_round, testing_this_round)
+		
 		# ####################################################################### TESTES kfold INÍCIO
 		# # Teste para imprimir a quantidade de imagens enviadas para teste e treinamento
 		# print("\nk-fold {0}:".format(fold_i+1))
@@ -91,12 +89,10 @@ def kfold(dataset, classes_num, descriptor):
     # todo acurácia média em todas as rodadas
 
 if __name__ == "__main__":	
-# Definição do diretório de trabalho
-	path = './data/dataset2/treinamento/'
+	# Definição do diretório de trabalho
+	path = './data/dataset1/treinamento/'
 	classes = classes(path)
 	dataset = dataset(classes)
-	##TO-DO: esse número de classes fica hardcoded????? pls check (numero de letras que teremos na rede)
-	classes_num = 3
 
 	parser = argparse.ArgumentParser(description='Choice of which image descriptor will be used in the MLP') 
 	parser.add_argument('--descriptor', '--desc', required= True, help="Choose descriptor HOG or LBP to use in the MLP")
@@ -106,4 +102,5 @@ if __name__ == "__main__":
 	if descriptor != "HOG" and descriptor != "LBP":
 		print("The descriptor should be 'HOG' or 'LBP'")
 	else:
-		kfold(dataset, classes_num, descriptor)
+		mlp = perceptron.MLP(4, 1.0, len(classes), descriptor, path)
+		kfold(dataset, mlp)

@@ -1,145 +1,126 @@
 import numpy as np
 import nguyen as ng
 import time
+import random
 import imagelib #file written to encapsulate the image processing functions
 
-#sigmoid function - activation
-def activFunction(x):
-	return 1/(1+np.exp(-x))	
 
-def derivative(x):
-	return x*(1-x)
+class MLP(object):
+	def __init__(self, hidden_layer_neuron, alpha, classes_num, descriptor, path):
+		self.path = path
+		self.bias = 1
+		self.alpha = alpha
+		self.descriptor = descriptor
+		self.l0_neurons = None
+		self.l1_neurons = hidden_layer_neuron
+		self.l2_neurons = classes_num
+		self.weights_0 = None
+		self.weights_1 = None
+		self.epochs = 100000
+		self.config_file = None
+		self.error_file = None
 
-#function to write in the config.txt
-def writeConfigFile(config_file, alpha, l1_neurons, l2_neurons, maxEpochs):
-	config_file.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
 
-	config_file.write("extrator: HOG\n")
-	config_file.write("extrator_orientacoes: 9\n")
-	config_file.write("extrator_pixel_por_celula: 8\n")
-	config_file.write("extrator_celula_por_bloco: 1\n\n")
-	config_file.write("extrator: LBP \n")
-	config_file.write("extrator_orientacoes: \n")
-	config_file.write("extrator_pixel_por_celula: \n")
-	config_file.write("extrator_celula_por_bloco: \n\n")
+	#sigmoid function - activation
+	def activFunction(self, x):
+		return 1 / (1 + np.exp(-x))
 
-	config_file.write("rede_alpha: {0}\n".format(alpha))
-	config_file.write("rede_camada_1_neuronios: {0}\n".format(l1_neurons))
-	config_file.write("rede_camada_1_funcao_ativacao: sigmoide\n")
-	config_file.write("rede_camada_2_neuronios: {0}\n".format(l2_neurons))
-	config_file.write("rede_camada_0_funcao_ativacao: sigmoide\n")
-	config_file.write("rede_inicializacao_pesos: nguyen-widrow\n")
-	config_file.write("rede_max_epocas: {0}\n".format(maxEpochs))
-	config_file.write("rede_tecnica_ajuste_alpha: subtracao de alpha por um valor pequeno\n")
 
-#function called by each K-fold cross validation iteration to treat the images data and run the MLP for them
+	def derivative(self, x):
+		return x * (1 - x)
 
-##TO-DO: solucionar e tirar os comentarios dessa função
-def run(training_data, testing_data, classes_num, descriptor):
-	maxEpochs = 10000
-	epochs = 0
-	output_matrix = np.matlib.identity(classes_num) #identity matrix - 1s in the diagonal
 
-	#while epochs < maxEpochs: //for N epochs
-		#for fold in range(len(training_data)): //for each one of the 4 training folds
-			#//go through all the images and do like the following:
+	#function to write in the config.txt
+	def write_config_file(self):
+		self.config_file.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
+		self.config_file.write("extrator: HOG\n")
+		self.config_file.write("extrator_orientacoes: 9\n")
+		self.config_file.write("extrator_pixel_por_celula: 8\n")
+		self.config_file.write("extrator_celula_por_bloco: 1\n\n")
+		self.config_file.write("extrator: LBP \n")
+		self.config_file.write("extrator_orientacoes: \n")
+		self.config_file.write("extrator_pixel_por_celula: \n")
+		self.config_file.write("extrator_celula_por_bloco: \n\n")
+		self.config_file.write("rede_alpha: {0}\n".format(self.alpha))
+		self.config_file.write("rede_camada_1_neuronios: {0}\n".format(self.l1_neurons))
+		self.config_file.write("rede_camada_1_funcao_ativacao: sigmoide\n")
+		self.config_file.write("rede_camada_2_neuronios: {0}\n".format(self.l2_neurons))
+		self.config_file.write("rede_camada_0_funcao_ativacao: sigmoide\n")
+		self.config_file.write("rede_inicializacao_pesos: nguyen-widrow\n")
+		self.config_file.write("rede_max_epocas: {0}\n".format(self.epochs))
+		self.config_file.write("rede_tecnica_ajuste_alpha: subtracao de alpha por um valor pequeno\n")
 
-	#BEGIN# - put inside FOR Loop
-	img_name = "src/test_z.png"
-	image = None
-	if descriptor == "HOG":
-		image = imagelib.getHog(img_name)
-	elif descriptor == "LBP":
-		image = imagelib.getLBP(img_name) 
 
-	print(image)
-	#image_class = getImageClass(img_name) - TO-DO THIS FUNCTION
-	#expected output = ver como pega
-	#para aquela imagem vai ser a coluna da output_matrix corresponde aquela classe
-	#Ex: imagem -> Vê que ela é X
-		#pega a coluna 1 da matriz
-		#imagem -> vê que ela é Y
-		#pega a coluna 2 da matriz
+	def training(self, image_name):
+		mlp_input = None
+		image = None
 
-	#hardcode para teste - apagar depois
-	expected_output = np.array([[0],
-				[0],
-				[1]])
+		bias_0 = self.bias
+		bias_1 = self.bias
 
-	#MLP(image, expected_output, classes_num) - FUNCAO DA REDE EM SI não tá rodando ainda porque o numero de neuronios tá errado (l0_neurons e l1_neurons na funcao MLP)
-	#END#
+		if self.descriptor == "HOG":
+			image = imagelib.getHog(self.path + image_name)
+		elif descriptor == "LBP":
+			image = imagelib.getLBP(image_name)
+		
+		mlp_input = np.reshape(image, np.size(image))
+		self.l0_neurons = len(mlp_input)
+		# print("Quantidade de neurons: {neuron}".format(neuron=self.l0_neurons))
+		print(image_name)
+		# print(mlp_input)
+		weights_0 = ng.nguyen(self.l0_neurons, self.l1_neurons)
+		weights_1 = ng.nguyen(self.l1_neurons, self.l2_neurons)
 
-#TO-DO tem que arrumar isso. É como se tivesse rodando a rede N vezes pra uma entrada. E na verdade tem que rodar N vezes (ja definidas na função Run) passando uma imagem por vez. 
-#Tem que ver isso porque não sei como arruma
-def MLP(mlp_input, expected_output, classes_num):
-	bias0 = 1
-	bias1 = 1
-	alpha = 1.0 #learning rate
-
-	##TO-DO COMO PEGAR ESSES VALORES SEM SER HARDCODED? - Numero de neuronios em cada camada
-	#SOLUÇÃO #TO-DO ver quantas colunas a nossa matriz de input tem (a matriz do descriptor no caso), deve ter no numpy, (o numero de colunas da matriz de input é o número de neuronios na camada 0)
-	#Pra camada 1: #TO-DO não sei como se estipula quantos neuronios tem que ter nela - procurar
-	#Pra camada 2 vai ser o numero de classes que a gente tem no fim das contas - (só pra esclarecer)
-
-	#for the layer 2 (final layer), the num of neurons is the number of classes
-	l0_neurons = 6
-	l1_neurons = 4
-	l2_neurons = classes_num 
-
-	#initialize weights -random
-	weights0 = ng.nguyen(l0_neurons, l1_neurons)
-	weights1 = ng.nguyen(l1_neurons, l2_neurons)
-
-	config_file = open("config.txt", "w")
-	error_file = open("error.txt", "w")
-	error_file.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
-	writeConfigFile(config_file, alpha, l1_neurons, l2_neurons, maxEpochs)
-
-	while epochs < maxEpochs:
-		#training
-
-		totalEpochErrors = []
-		if alpha < 0:
-			config_file.write("rede_criterio_parada: alpha < 0")
-			break
+		self.error_file.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
+		self.write_config_file()
 
 		#feed forward
-		layer0 = mlp_input
-		layer1 = activFunction(np.dot(layer0,weights0) + bias0)
-		layer2 = activFunction(np.dot(layer1,weights1) + bias1)
+		layer_0 = mlp_input
+		layer_1 = self.activFunction(np.dot(layer_0, weights_0) + bias_0)
+		layer_2 = self.activFunction(np.dot(layer_1, weights_1) + bias_1)
 
-		#error layer 2
-		y_error = (expected_output - layer2)
-		avg_y_error = np.mean(np.abs(y_error))
-		totalEpochErrors.append(avg_y_error) 
+		# #error layer 2
+		# expected_output = 2
+		# y_error = (expected_output - layer_2)
+		# avg_y_error = np.mean(np.abs(y_error))
 
-		#calculates weights and bias delta
-		y_error = y_error * derivative(layer2)
-		y_delta = alpha * layer1.T.dot(y_error)
-		bias0_delta = alpha * y_error
+		# #calculates weights and bias delta
+		# y_error = y_error * self.derivative(layer_2)
+		# y_delta = self.alpha * layer_1.T.dot(y_error)
+		# bias_0_delta = self.alpha * y_error
 
-		#repass error to hidden layer (layer 1)
-		z_error = y_error.dot(weights1.T)
-		z_error = z_error * derivative(layer1)
-		z_delta = alpha * layer0.T.dot(z_error)
-		bias1_delta = alpha * z_error
+		# #repass error to hidden layer (layer 1)
+		# z_error = y_error.dot(weights_1.T)
+		# z_error = z_error * self.derivative(layer_1)
+		# z_delta = self.alpha * layer_0.T.dot(z_error)
+		# bias_1_delta = self.alpha * z_error
 
-		weights1 += y_delta
-		weights0 += z_delta
-		alpha = alpha - 0.000001
+		# weights_1 += y_delta
+		# weights_0 += z_delta
 
-		#calculates the average error for that epoch and prints to the error file
-		averageError = np.mean(totalEpochErrors)
-		error_file.write("{0};{1};0\n".format(epochs, averageError))
+		# self.weights_0 = weights_0
+		# self.weights_1 = weights_1
 
-		epochs += 1
+		# self.alpha = self.alpha - (self.alpha / self.epochs)
+		
+		# print (layer_2)	
+		
 
-	print (layer2)
-	config_file.close()
-	error_file.close()
+	def testing(self, test_data):
+		print("TESTING - Oi, Laura! :D")
 
 
+	def run(self, training_data, testing_data):
+		self.config_file = open("config.txt", "w")
+		self.error_file = open("error.txt", "w")
 
-#if __name__ == "__main__":
+		# for i in range(self.epochs):
+		# for i in range(2):	
+		for image in training_data:
+			self.training(image)
+			# self.testing(image)
+
+		self.config_file.close()
+		self.error_file.close()
 
 	
