@@ -1,37 +1,7 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from skimage import data, color, exposure
-from skimage.feature import hog
-from skimage.io import imread
+from image import getImages, calculateHog, calculateLBP
 
+images = getImages("data/dataset1/treinamento/")
 
-from os import listdir
-from os.path import isfile, join
-
-mypath = "data/dataset1/testes/"
-
-files = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-
-
-teste = imread(mypath + files[0])
-image = color.rgb2gray(teste)
-
-fd, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16),
-                    cells_per_block=(1, 1), visualise=True)
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4), sharex=True, sharey=True)
-
-ax1.axis('off')
-ax1.imshow(image, cmap=plt.cm.gray)
-ax1.set_title('Input image')
-ax1.set_adjustable('box-forced')
-
-# Rescale histogram for better display
-hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 0.02))
-
-
-ax2.axis('off')
-ax2.imshow(hog_image_rescaled, cmap=plt.cm.gray)
-ax2.set_title('Histogram of Oriented Gradients')
-ax1.set_adjustable('box-forced')
-plt.show()
+for image in images:
+	hogResult = calculateHog(image)
+	lbpResult = calculateLBP(image)

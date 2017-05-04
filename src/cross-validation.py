@@ -1,5 +1,6 @@
 import os
 import perceptron as mlp
+import argparse
 
 def classes(path):
 	"""
@@ -41,7 +42,7 @@ def dataset(classes):
 
 	return dataset
 
-def kfold(dataset):
+def kfold(dataset, classes_num, descriptor):
 	"""
 	Validação cruzada utilizando o mé todo k-fold
 	:Parameters:
@@ -52,8 +53,8 @@ def kfold(dataset):
 	num_folds = 5
 	subset_size = int(len(dataset[0])/num_folds)	
 
-	for fold_i in range(num_folds):
-
+	#for fold_i in range(num_folds):
+	for fold_i in range(1): ##TO-DO - tirar essa linha, coloquei só pra não rodar varias vezes
 		testing_this_round = list()
 		training_this_round = list()
 		
@@ -61,8 +62,10 @@ def kfold(dataset):
 			testing_this_round = testing_this_round + dataset[dataset_j][fold_i*subset_size:][:subset_size]      
 			training_this_round = training_this_round + dataset[dataset_j][:fold_i*subset_size] + dataset[dataset_j][(fold_i+1)*subset_size:]
 		
-		mlp.run()
-			
+		mlp.run(training_this_round, testing_this_round, classes_num, descriptor)
+		##TO-DO: COMO DEVERIA SER:::::::
+		#training_this_round = dataset1, dataset2, dataset3, dataset4
+		#mlp.run(training_this_round, testing_this_round)
 		
 
 		# ####################################################################### TESTES kfold INÍCIO
@@ -92,4 +95,15 @@ if __name__ == "__main__":
 	path = './data/dataset2/treinamento/'
 	classes = classes(path)
 	dataset = dataset(classes)
-	kfold(dataset)
+	##TO-DO: esse número de classes fica hardcoded????? pls check (numero de letras que teremos na rede)
+	classes_num = 3
+
+	parser = argparse.ArgumentParser(description='Choice of which image descriptor will be used in the MLP') 
+	parser.add_argument('--descriptor', '--desc', required= True, help="Choose descriptor HOG or LBP to use in the MLP")
+	args = parser.parse_args()
+	descriptor = args.descriptor
+
+	if descriptor != "HOG" and descriptor != "LBP":
+		print("The descriptor should be 'HOG' or 'LBP'")
+	else:
+		kfold(dataset, classes_num, descriptor)
