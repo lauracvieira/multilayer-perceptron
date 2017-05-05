@@ -2,7 +2,8 @@ import numpy as np
 import nguyen as ng
 import time
 import random
-import imagelib #file written to encapsulate the image processing functions
+import imagelib
+import output
 
 
 class MLP(object):
@@ -66,7 +67,8 @@ class MLP(object):
 		mlp_input = np.reshape(image, np.size(image))
 		self.l0_neurons = len(mlp_input)
 		# print("Quantidade de neurons: {neuron}".format(neuron=self.l0_neurons))
-		print(image_name)
+		#print(image_name)
+		#print (output.get_output(image_name))
 		# print(mlp_input)
 		weights_0 = ng.nguyen(self.l0_neurons, self.l1_neurons)
 		weights_1 = ng.nguyen(self.l1_neurons, self.l2_neurons)
@@ -79,32 +81,41 @@ class MLP(object):
 		layer_1 = self.activFunction(np.dot(layer_0, weights_0) + bias_0)
 		layer_2 = self.activFunction(np.dot(layer_1, weights_1) + bias_1)
 
-		# #error layer 2
-		# expected_output = 2
-		# y_error = (expected_output - layer_2)
-		# avg_y_error = np.mean(np.abs(y_error))
+		#error layer 2
+		expected_output = output.get_output(image_name)
+		y_error = expected_output - layer_2
+		avg_y_error = np.mean(np.abs(y_error))
 
-		# #calculates weights and bias delta
-		# y_error = y_error * self.derivative(layer_2)
-		# y_delta = self.alpha * layer_1.T.dot(y_error)
-		# bias_0_delta = self.alpha * y_error
+		#calculates weights and bias delta
+		#print("--- Y ERROR ---")
+		#print(y_error)
+		#print("--- derivada ---")
+		layer_2D = self.derivative(layer_2)
+		layer_2MT = np.matrix(layer_2D).T
 
-		# #repass error to hidden layer (layer 1)
-		# z_error = y_error.dot(weights_1.T)
-		# z_error = z_error * self.derivative(layer_1)
-		# z_delta = self.alpha * layer_0.T.dot(z_error)
-		# bias_1_delta = self.alpha * z_error
+		layer_1MT = np.matrix(layer_1).T
+		#print(layer_1MT)
+		y_error = y_error * layer_2MT
+		y_delta = self.alpha * layer_1MT.dot(y_error.T)
+		bias_0_delta = self.alpha * y_error
+		#repass error to hidden layer (layer 1)
+		z_error = y_error.T.dot(weights_1.T)
+		# layerT1 = np.matrix(layer_1).T
+		layer_1MTD = self.derivative(layer_1)
+		layer_1MTD = np.matrix(layer_1MTD)
+		z_error = z_error * layer_1MTD.T
+		z_delta = self.alpha * np.matrix(layer_0).T.dot(z_error)
+		bias_1_delta = self.alpha * z_error
 
-		# weights_1 += y_delta
-		# weights_0 += z_delta
+		weights_1 += y_delta
+		weights_0 += z_delta
 
-		# self.weights_0 = weights_0
-		# self.weights_1 = weights_1
+		self.weights_0 = weights_0
+		self.weights_1 = weights_1
 
-		# self.alpha = self.alpha - (self.alpha / self.epochs)
+		self.alpha = self.alpha - (self.alpha / self.epochs)
 		
-		# print (layer_2)	
-		
+		# print (layer_2)		
 
 	def testing(self, test_data):
 		print("TESTING - Oi, Laura! :D")
@@ -114,11 +125,14 @@ class MLP(object):
 		self.config_file = open("config.txt", "w")
 		self.error_file = open("error.txt", "w")
 
+		random.shuffle(training_data)
 		# for i in range(self.epochs):
-		# for i in range(2):	
+		# for i in range(2):
 		for image in training_data:
 			self.training(image)
-			# self.testing(image)
+			
+		for image in testing_data:
+			self.testing(image)
 
 		self.config_file.close()
 		self.error_file.close()

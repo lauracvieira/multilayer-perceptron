@@ -1,6 +1,6 @@
 import numpy.matlib as np
 
-def getLetter(imageName):
+def get_letter(imageName):
 	classes = {	'train_41': 'A', 
 			 	'train_42': 'B',
 			 	'train_43': 'C', 
@@ -30,7 +30,7 @@ def getLetter(imageName):
 
 	return classes[imageName[:8]]
 
-def getOutput(imageName,part2 = False):
+def get_output(imageName,part2 = False):
 	if part2 == True:
 		letras = {	'A': 0, 
 				 	'B': 1,
@@ -64,14 +64,13 @@ def getOutput(imageName,part2 = False):
 				 	'X': 1,
 				 	'Z': 2}
 
-	letra = getLetter(imageName)
+	letra = get_letter(imageName)
 	if part2 == True:
 		output_matrix = np.identity(26)
 	else:
 		output_matrix = np.identity(3)
 	valor = letras[letra]
 	linha = output_matrix[valor]
-	print("{}".format(linha.T))
 	return linha.T
 
 
