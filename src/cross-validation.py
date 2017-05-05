@@ -61,10 +61,10 @@ def kfold(dataset, mlp):
 		for dataset_j in range(len(dataset)):
 			testing_this_round = testing_this_round + dataset[dataset_j][fold_i*subset_size:][:subset_size]      
 			training_this_round = training_this_round + dataset[dataset_j][:fold_i*subset_size] + dataset[dataset_j][(fold_i+1)*subset_size:]
-		
-
+	
 
 		mlp.run(training_this_round, testing_this_round)
+		break
 		
 		# ####################################################################### TESTES kfold INÍCIO
 		# # Teste para imprimir a quantidade de imagens enviadas para teste e treinamento
@@ -99,8 +99,12 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	descriptor = args.descriptor
 
+	epochs = 10000
+	hidden_neurons = 4
+	alpha = 1.0
+
 	if descriptor != "HOG" and descriptor != "LBP":
 		print("The descriptor should be 'HOG' or 'LBP'")
 	else:
-		mlp = perceptron.MLP(4, 1.0, len(classes), descriptor, path)
+		mlp = perceptron.MLP(hidden_neurons, alpha, len(classes), descriptor, path, epochs)
 		kfold(dataset, mlp)
