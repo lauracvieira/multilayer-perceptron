@@ -1,4 +1,6 @@
 import numpy.matlib as np
+import pickle
+import time
 
 def get_letter(imageName):
 	classes = {	'train_41': 'A', 
@@ -73,7 +75,15 @@ def get_output(imageName,part2 = False):
 	linha = output_matrix[valor]
 	return linha.T
 
+def serialize_model(weight_0, weight_1):
+	data = (weight_0, weight_1)
+	file = open('./output/model.dat', "wb")
+	pickle.dump(data, file)
+	file.close()
 
-
-
-
+def de_serialize_model():
+	file = open('./output/model.dat', "rb")
+	data = pickle.load(file)
+	file.close()
+	print(data)
+	return data
