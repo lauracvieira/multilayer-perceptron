@@ -42,7 +42,7 @@ def dataset(classes):
 
 	return dataset
 
-def kfold(dataset, mlp):
+def kfold(dataset, hidden_neurons, alpha, classes_num, descriptor, path, epochs):
 	"""
 	Validação cruzada utilizando o mé todo k-fold
 	:Parameters:
@@ -54,18 +54,18 @@ def kfold(dataset, mlp):
 	subset_size = int(len(dataset[0])/num_folds)	
 
 	#for fold_i in range(num_folds):
-	for fold_i in range(1): ##TO-DO - tirar essa linha, coloquei só pra não rodar varias vezes
+	for fold_i in range(num_folds): ##TO-DO - tirar essa linha, coloquei só pra não rodar varias vezes
 		testing_this_round = list()
 		training_this_round = list()
 		
 		for dataset_j in range(len(dataset)):
 			testing_this_round = testing_this_round + dataset[dataset_j][fold_i*subset_size:][:subset_size]      
 			training_this_round = training_this_round + dataset[dataset_j][:fold_i*subset_size] + dataset[dataset_j][(fold_i+1)*subset_size:]
-	
+		
 
+		mlp = perceptron.MLP(hidden_neurons, alpha, classes_num, descriptor, path, epochs)
 		mlp.run(training_this_round, testing_this_round)
-		break
-		#teste#
+		# break;
 		
 		# ####################################################################### TESTES kfold INÍCIO
 		# # Teste para imprimir a quantidade de imagens enviadas para teste e treinamento
@@ -100,12 +100,11 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	descriptor = args.descriptor
 
-	epochs = 10000
-	hidden_neurons = 4
+	epochs = 1
+	hidden_neurons = 32
 	alpha = 1.0
 
-	if descriptor != "HOG" and descriptor != "LBP":
-		print("The descriptor should be 'HOG' or 'LBP'")
+	if descriptor in ['HOG', 'LBP']:
+		kfold(dataset, hidden_neurons, alpha, len(classes), descriptor, path, epochs)
 	else:
-		mlp = perceptron.MLP(hidden_neurons, alpha, len(classes), descriptor, path, epochs)
-		kfold(dataset, mlp)
+		print("The descriptor should be 'HOG' or 'LBP'")
