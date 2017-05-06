@@ -65,6 +65,7 @@ def kfold(dataset, mlp):
 
 		mlp.run(training_this_round, testing_this_round)
 		break
+		#teste#
 		
 		# ####################################################################### TESTES kfold INÍCIO
 		# # Teste para imprimir a quantidade de imagens enviadas para teste e treinamento
