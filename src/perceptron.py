@@ -4,10 +4,11 @@ import time
 import random
 import imagelib
 import output
+from datetime import datetime
 
 
 class MLP(object):
-	def __init__(self, hidden_layer_neuron, alpha, classes_num, descriptor, path):
+	def __init__(self, hidden_layer_neuron, alpha, classes_num, descriptor, path, epochs):
 		self.path = path
 		self.bias = 1
 		self.alpha = alpha
@@ -15,11 +16,24 @@ class MLP(object):
 		self.l0_neurons = None
 		self.l1_neurons = hidden_layer_neuron
 		self.l2_neurons = classes_num
-		self.weights_0 = None
-		self.weights_1 = None
-		self.epochs = 100000
+		self.epochs = epochs
 		self.config_file = None
 		self.error_file = None
+		self.previous_test_error = 10
+		self.previous_weights_0 = None
+		self.previous_weights_1 = None
+
+		if self.descriptor == "HOG":
+			self.l0_neurons = 576
+		elif descriptor == "LBP":
+			self.l0_neurons = 4096
+
+		self.weights_0 = ng.nguyen(self.l0_neurons, self.l1_neurons)
+		self.weights_1 = ng.nguyen(self.l1_neurons, self.l2_neurons)
+		self.avg_test_error = 0
+		self.test_number = 0
+		self.avg_training_error = 0
+		self.training_number = 0
 
 
 	#sigmoid function - activation
@@ -56,85 +70,124 @@ class MLP(object):
 		mlp_input = None
 		image = None
 
+		bias0 = self.bias
+		bias1 = self.bias
+
+		if self.descriptor == "HOG":
+			image = imagelib.getHog(self.path + image_name)
+		elif self.descriptor == "LBP":
+			image = imagelib.getLBP(self.path + image_name)
+		
+		# print(np.size(image))
+		mlp_input = np.array(image.reshape(1,np.size(image)))
+		self.l0_neurons = len(mlp_input)
+		expected_output = np.array(output.get_output(image_name))
+
+		previous_weights_0 = self.weights_0
+		previous_weights_1 = self.weights_1
+
+		weights0 = self.weights_0
+		weights1 = self.weights_1
+
+		self.write_config_file()
+
+
+		#feed forward
+		layer0 = mlp_input
+		layer1 = self.activFunction(np.dot(layer0,weights0) + bias0) #->1x6 (1x576 por 576x6)
+		layer2 = self.activFunction(np.dot(layer1,weights1) + bias1).T #->1X3 (1x6 por 6x3)
+		y_error = (expected_output - layer2) # 3x1 - 1X3(T) = 1X3
+		avg_y_error = np.mean(np.abs(y_error)) #erro médio de uma imagem
+		self.avg_training_error = self.avg_training_error + avg_y_error**2
+		self.training_number = self.training_number + 1
+
+		#-------------- ATE AQUI TA CERTO ------------------	]
+		# print(y_error)
+		y_error = y_error*self.derivative(layer2) #y_error = 3x1
+		y_error = y_error.T
+		y_delta = self.alpha * layer1.T.dot(y_error) #layer1 = 1x1 - y_error = 3x3
+		bias0_delta = self.alpha * y_error
+
+		#repass error to hidden layer (layer 1)
+		z_error = y_error.dot(weights1.T)
+		z_error = z_error * self.derivative(layer1)
+		z_delta = self.alpha * layer0.T.dot(z_error)
+		bias1_delta = self.alpha * z_error
+
+		weights1 += y_delta
+		weights0 += z_delta
+		self.weights_1 = weights1
+		self.weights_0 = weights0
+		
+		# print(weights1)
+		# print(weights0)
+		#print (layer2)		
+
+	def testing(self, image_name):
+		mlp_input = None
+		image = None
+		# totalEpochErrors = []
 		bias_0 = self.bias
 		bias_1 = self.bias
 
 		if self.descriptor == "HOG":
 			image = imagelib.getHog(self.path + image_name)
-		elif descriptor == "LBP":
+		elif self.descriptor == "LBP":
 			image = imagelib.getLBP(image_name)
-		
+
 		mlp_input = np.reshape(image, np.size(image))
-		self.l0_neurons = len(mlp_input)
-		# print("Quantidade de neurons: {neuron}".format(neuron=self.l0_neurons))
-		#print(image_name)
-		#print (output.get_output(image_name))
-		# print(mlp_input)
-		weights_0 = ng.nguyen(self.l0_neurons, self.l1_neurons)
-		weights_1 = ng.nguyen(self.l1_neurons, self.l2_neurons)
+		l0_neurons = len(mlp_input)
 
-		self.error_file.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
-		self.write_config_file()
-
-		#feed forward
+		print ("TESTE IMAGE {}".format(output.get_letter(image_name)))
 		layer_0 = mlp_input
-		layer_1 = self.activFunction(np.dot(layer_0, weights_0) + bias_0)
-		layer_2 = self.activFunction(np.dot(layer_1, weights_1) + bias_1)
+		layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
+		layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1)
 
 		#error layer 2
-		expected_output = output.get_output(image_name)
-		y_error = expected_output - layer_2
-		avg_y_error = np.mean(np.abs(y_error))
+		expected_output = np.array(output.get_output(image_name))
+		y_error = (expected_output - layer_2)
+		avg_y_error = np.mean(np.abs(y_error)) #erro médio de uma imagem
+		self.avg_test_error = self.avg_test_error + avg_y_error**2
+		self.test_number = self.test_number + 1
 
-		#calculates weights and bias delta
-		#print("--- Y ERROR ---")
-		#print(y_error)
-		#print("--- derivada ---")
-		layer_2D = self.derivative(layer_2)
-		layer_2MT = np.matrix(layer_2D).T
-
-		layer_1MT = np.matrix(layer_1).T
-		#print(layer_1MT)
-		y_error = y_error * layer_2MT
-		y_delta = self.alpha * layer_1MT.dot(y_error.T)
-		bias_0_delta = self.alpha * y_error
-		#repass error to hidden layer (layer 1)
-		z_error = y_error.T.dot(weights_1.T)
-		# layerT1 = np.matrix(layer_1).T
-		layer_1MTD = self.derivative(layer_1)
-		layer_1MTD = np.matrix(layer_1MTD)
-		z_error = z_error * layer_1MTD.T
-		z_delta = self.alpha * np.matrix(layer_0).T.dot(z_error)
-		bias_1_delta = self.alpha * z_error
-
-		weights_1 += y_delta
-		weights_0 += z_delta
-
-		self.weights_0 = weights_0
-		self.weights_1 = weights_1
-
-		self.alpha = self.alpha - (self.alpha / self.epochs)
-		
-		# print (layer_2)		
-
-	def testing(self, test_data):
-		print("TESTING - Oi, Laura! :D")
-
+		print (layer_2)
+		# print("Erros totais: {0}".format(totalEpochErrors))
+		print("\n")
 
 	def run(self, training_data, testing_data):
-		self.config_file = open("config.txt", "w")
-		self.error_file = open("error.txt", "w")
+		self.config_file = open("outputs/config.txt", "w")
+		self.error_file = open("outputs/error.txt", "w")
 
 		random.shuffle(training_data)
-		# for i in range(self.epochs):
+		random.shuffle(testing_data)
+		self.error_file.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
+		print ("Kfold with N epochs started at: {0}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+		for i in range(self.epochs):
+			print ("--- EPOCH {0} --- ".format(i))
 		# for i in range(2):
-		for image in training_data:
-			self.training(image)
-			
-		for image in testing_data:
-			self.testing(image)
+			for image in training_data:
+				self.training(image)
+			self.avg_training_error = self.avg_training_error/self.training_number
+			#print("Erro quadratico meio dessa epoca de treinamento: {0}".format(self.erro_treino_medio))	
 
+			for image in testing_data:
+				self.testing(image)
+			self.avg_test_error = self.avg_test_error/self.test_number
+			#print("Erro quadratico medio dessa epoca de testes: {0}".format(self.erro_teste_medio))
+			self.error_file.write("{0};{1};{2}\n".format(i, self.avg_training_error, self.avg_test_error))
+
+			#if self.avg_test_error > self.previous_test_error:
+				#self.weights_0 = self.previous_weights_0
+				#self.weights_1 = self.previous_weights_1
+				#break
+			
+			self.alpha = self.alpha - (1 / self.epochs)
+			self.previous_test_error = self.avg_test_error
+			self.avg_training_error = 0
+			self.avg_test_error = 0	
+			self.test_number = 0
+			self.training_number = 0
+
+		print ("Kfold with N epochs ended at: {0}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 		self.config_file.close()
 		self.error_file.close()
-
-	
