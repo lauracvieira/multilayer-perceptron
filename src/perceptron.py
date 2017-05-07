@@ -44,8 +44,7 @@ class MLP(object):
 			image = imagelib.getHog("./data/img_test.png", self.descriptor_param_1, self.descriptor_param_2, self.descriptor_param_3)
 		elif self.descriptor == "LBP":
 			image = imagelib.getLBP("./data/img_test.png", self.descriptor_param_1, self.descriptor_param_2)
-		img_teste = np.array(image.reshape(1, np.size(image)))
-		self.l0_neurons = len(img_teste)
+		self.l0_neurons = np.size(image)
 
 		#inicializacao dos pesos
 		self.weights_0 = funcoes.nguyen(self.l0_neurons, self.l1_neurons)
