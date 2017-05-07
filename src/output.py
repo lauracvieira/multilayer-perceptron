@@ -1,8 +1,10 @@
 import numpy.matlib as np
 import pickle
-import time
 
 def get_letter(imageName):
+	"""
+	Retorna a letra relacionada à classe do arquivo.
+	"""
 	classes = {	'train_41': 'A', 
 			 	'train_42': 'B',
 			 	'train_43': 'C', 
@@ -33,6 +35,9 @@ def get_letter(imageName):
 	return classes[imageName[:8]]
 
 def get_output(imageName,part2 = False):
+	"""
+	Retorna um vetor contendo configuração de saída esperada
+	"""
 	if part2 == True:
 		letras = {	'A': 0, 
 				 	'B': 1,
@@ -76,12 +81,18 @@ def get_output(imageName,part2 = False):
 	return linha.T
 
 def serialize_model(weight_0, weight_1):
+	"""
+	Serialiização dos pesos no arquivo output/model.dat
+	"""
 	data = (weight_0, weight_1)
 	file = open('./output/model.dat', "wb")
 	pickle.dump(data, file)
 	file.close()
 
 def de_serialize_model():
+	"""
+	Resgata os dados serializados no arquivo model.dat
+	"""
 	file = open('./output/model.dat', "rb")
 	data = pickle.load(file)
 	file.close()
