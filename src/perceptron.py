@@ -12,6 +12,7 @@ class MLP(object):
 	def __init__(self, hidden_layer_neuron, alpha, classes_num, descriptor, path, epochs, descriptor_param1, descriptor_param2, descriptor_param3):
 		self.path = path
 		self.bias = 1
+		self.initial_alpha = alpha
 		self.alpha = alpha
 		self.descriptor = descriptor
 		self.l0_neurons = None
@@ -52,22 +53,25 @@ class MLP(object):
 	#function to write in the config.txt
 	def write_config_file(self):
 		self.config_file.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
-		self.config_file.write("extrator: HOG\n")
-		self.config_file.write("extrator_orientacoes: 9\n")
-		self.config_file.write("extrator_pixel_por_celula: 8\n")
-		self.config_file.write("extrator_celula_por_bloco: 1\n\n")
-		self.config_file.write("extrator: LBP \n")
-		self.config_file.write("extrator_orientacoes: \n")
-		self.config_file.write("extrator_pixel_por_celula: \n")
-		self.config_file.write("extrator_celula_por_bloco: \n\n")
-		self.config_file.write("rede_alpha: {0}\n".format(self.alpha))
+
+		if self.descriptor == "HOG":
+			self.config_file.write("extrator: HOG\n")
+			self.config_file.write("extrator_orientacoes: {}\n".format(self.descriptor_param1))
+			self.config_file.write("extrator_pixel_por_celula: {}\n".format(self.descriptor_param2))
+			self.config_file.write("extrator_celula_por_bloco: {}\n\n".format(self.descriptor_param3))
+		elif descriptor == "LBP":
+			self.config_file.write("extrator: LBP \n")
+			self.config_file.write("extrator_set_points: {}\n".format(self.descriptor_param1))
+			self.config_file.write("extrator_radius: {}\n".format(self.descriptor_param2))
+
+		self.config_file.write("rede_alpha: {0}\n".format(self.initial_alpha))
 		self.config_file.write("rede_camada_1_neuronios: {0}\n".format(self.l1_neurons))
 		self.config_file.write("rede_camada_1_funcao_ativacao: sigmoide\n")
 		self.config_file.write("rede_camada_2_neuronios: {0}\n".format(self.l2_neurons))
 		self.config_file.write("rede_camada_0_funcao_ativacao: sigmoide\n")
 		self.config_file.write("rede_inicializacao_pesos: nguyen-widrow\n")
 		self.config_file.write("rede_max_epocas: {0}\n".format(self.epochs))
-		self.config_file.write("rede_tecnica_ajuste_alpha: subtracao de alpha por um valor pequeno\n")
+		self.config_file.write("rede_tecnica_ajuste_alpha: 'self.alpha - (1 / self.epochs)'\n\n")
 
 
 	def training(self, image_name):
