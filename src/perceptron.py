@@ -213,8 +213,8 @@ class MLP(object):
 				#self.weights_0 = self.previous_weights_0
 				#self.weights_1 = self.previous_weights_1
 				#break
-			
-			self.alpha = self.alpha - (1 / self.epochs) #atualizacao da taxa de aprendizado
+			if self.alpha - 0.001 >= 0:
+				self.alpha = self.alpha - 0.001 #atualizacao da taxa de aprendizado
 			self.previous_test_error = self.avg_test_error  #salva os erros anteriores
 
 			#zera as medias de erros quadraticos para a proxima epoca	
