@@ -1,4 +1,4 @@
-import numpy.matlib as np
+import numpy as np
 import pickle
 
 def get_letter(imageName):
@@ -74,9 +74,9 @@ def get_output(imageName,part2 = False):
 
 	letra = get_letter(imageName)
 	if part2 == True:
-		output_matrix = np.identity(26)
+		output_matrix = np.matlib.identity(26)
 	else:
-		output_matrix = np.identity(3)
+		output_matrix = np.matlib.identity(3)
 	valor = letras[letra]
 	linha = output_matrix[valor]
 	return linha.T
