@@ -53,7 +53,18 @@ def kfold(dataset, hidden_neurons, alpha, classes_num, descriptor, path, epochs,
 		mlp = perceptron.MLP(hidden_neurons, alpha, classes_num, descriptor, path, epochs, descriptor_param1, descriptor_param2, descriptor_param3)
 		mlp.run(training_this_round, testing_this_round, fold_i)
 
-if __name__ == "__main__":	
+def create_directories(directories):
+	"""
+	Criação dos diretórios
+	"""
+	for directory in directories:
+		try:
+		    os.stat('./{0}'.format(directory))
+		except:
+		    os.mkdir('./{0}'.format(directory))
+
+if __name__ == "__main__":
+	create_directories(['data', 'src', 'output'])
 	# Definição do diretório de trabalho
 	path = './data/dataset1/treinamento/'
 	classes = classes(path)
