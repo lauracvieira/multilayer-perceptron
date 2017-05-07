@@ -5,8 +5,6 @@ import argparse
 def classes(path):
 	"""
 	Listagem das classes existentes no diretório
-	:Parameters:
-		path: diretório de trabalho
 	"""
 	classes = list()
 
@@ -19,8 +17,6 @@ def classes(path):
 def dataset(classes):
 	"""
 	Reúne os arquivos de cada classe em uma lista de listas
-	:Parameters:
-		classes: cada uma das classes a ser buscada
 	"""
 	dataset = list()
 
@@ -30,11 +26,10 @@ def dataset(classes):
 
 	return dataset
 
-def kfold(dataset, hidden_neurons, alpha, classes_num, descriptor, path, epochs, descriptor_param1, descriptor_param2, descriptor_param3 = 0):
+def kfold(dataset, hidden_neurons, alpha, classes_num, descriptor, path, epochs, 
+		  descriptor_param1, descriptor_param2, descriptor_param3 = 0):
 	"""
 	Validação cruzada utilizando o mé todo k-fold
-	:Parameters:
-		training: lista de imagens contidas em classes (cada classe é uma lista)
 	"""
 
 	# Define número de folds e tamanho do subset (que sempre vai ser igualmente dividido entre as classes)
