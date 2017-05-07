@@ -4,11 +4,12 @@ import time
 import random
 import imagelib
 import output
+import sys
 from datetime import datetime
 
 
 class MLP(object):
-	def __init__(self, hidden_layer_neuron, alpha, classes_num, descriptor, path, epochs):
+	def __init__(self, hidden_layer_neuron, alpha, classes_num, descriptor, path, epochs, descriptor_param1, descriptor_param2, descriptor_param3):
 		self.path = path
 		self.bias = 1
 		self.alpha = alpha
@@ -22,6 +23,9 @@ class MLP(object):
 		self.previous_test_error = 10
 		self.previous_weights_0 = None
 		self.previous_weights_1 = None
+		self.descriptor_param1 = descriptor_param1
+		self.descriptor_param2 = descriptor_param2
+		self.descriptor_param3 = descriptor_param3
 
 		if self.descriptor == "HOG":
 			self.l0_neurons = 576
@@ -74,59 +78,62 @@ class MLP(object):
 		bias1 = self.bias
 
 		if self.descriptor == "HOG":
-			image = imagelib.getHog(self.path + image_name)
+			image = imagelib.getHog(self.path + image_name, self.descriptor_param1, self.descriptor_param2, self.descriptor_param3)
 		elif self.descriptor == "LBP":
-			image = imagelib.getLBP(self.path + image_name)
+			image = imagelib.getLBP(self.path + image_name, self.descriptor_param1, self.descriptor_param2)
 		
-		# print(np.size(image))
+		# prepara as camadas de entrada
 		mlp_input = np.array(image.reshape(1,np.size(image)))
 		self.l0_neurons = len(mlp_input)
 		expected_output = np.array(output.get_output(image_name))
 
+		#guarda os pesos antigos
 		previous_weights_0 = self.weights_0
 		previous_weights_1 = self.weights_1
 
-		weights0 = self.weights_0
-		weights1 = self.weights_1
+		#prepara os pesos que serao utilizados nessa execucao do codigo
+		weights_0 = self.weights_0
+		weights_1 = self.weights_1
 
-		self.write_config_file()
-
-
+		
 		#feed forward
-		layer0 = mlp_input
-		layer1 = self.activFunction(np.dot(layer0,weights0) + bias0) #->1x6 (1x576 por 576x6)
-		layer2 = self.activFunction(np.dot(layer1,weights1) + bias1).T #->1X3 (1x6 por 6x3)
-		y_error = (expected_output - layer2) # 3x1 - 1X3(T) = 1X3
+		layer_0 = mlp_input
+		layer_1 = self.activFunction(np.dot(layer_0,weights_0) + bias0) #->1x6 (1x576 por 576x6)
+		layer_2 = self.activFunction(np.dot(layer_1,weights_1) + bias1).T #->1X3 (1x6 por 6x3)
+		y_error = (expected_output - layer_2) # 3x1 - 1X3(T) = 1X3
 		avg_y_error = np.mean(np.abs(y_error)) #erro médio de uma imagem
 		self.avg_training_error = self.avg_training_error + avg_y_error**2
 		self.training_number = self.training_number + 1
 
-		#-------------- ATE AQUI TA CERTO ------------------	]
-		# print(y_error)
-		y_error = y_error*self.derivative(layer2) #y_error = 3x1
+		#error layer 2
+		y_error = y_error*self.derivative(layer_2) #y_error = 3x1
 		y_error = y_error.T
-		y_delta = self.alpha * layer1.T.dot(y_error) #layer1 = 1x1 - y_error = 3x3
+		y_delta = self.alpha * layer_1.T.dot(y_error) #layer1 = 1x1 - y_error = 3x3
 		bias0_delta = self.alpha * y_error
 
-		#repass error to hidden layer (layer 1)
-		z_error = y_error.dot(weights1.T)
-		z_error = z_error * self.derivative(layer1)
-		z_delta = self.alpha * layer0.T.dot(z_error)
+		#repassa os erros para camada escondida
+		z_error = y_error.dot(weights_1.T)
+		z_error = z_error * self.derivative(layer_1)
+		z_delta = self.alpha * layer_0.T.dot(z_error)
 		bias1_delta = self.alpha * z_error
 
-		weights1 += y_delta
-		weights0 += z_delta
-		self.weights_1 = weights1
-		self.weights_0 = weights0
+		#atualizacao dos pesos
+		weights_1 += y_delta
+		weights_0 += z_delta
+		self.weights_1 = weights_1
+		self.weights_0 = weights_0
 		
-		# print(weights1)
-		# print(weights0)
-		#print (layer2)		
+		# print(weights_1)
+		# print(weights_0)
+		# print(layer_2)
+		np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
+		print("\n")
+
+
 
 	def testing(self, image_name):
 		mlp_input = None
 		image = None
-		# totalEpochErrors = []
 		bias_0 = self.bias
 		bias_1 = self.bias
 
@@ -150,13 +157,14 @@ class MLP(object):
 		self.avg_test_error = self.avg_test_error + avg_y_error**2
 		self.test_number = self.test_number + 1
 
-		print (layer_2)
-		# print("Erros totais: {0}".format(totalEpochErrors))
+		# print(layer_2)
+		np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
 		print("\n")
 
-	def run(self, training_data, testing_data):
-		self.config_file = open("outputs/config.txt", "w")
-		self.error_file = open("outputs/error.txt", "w")
+	def run(self, training_data, testing_data, fold_num):
+		self.config_file = open("output/config{0}.txt".format(fold_num+1), "w")
+		self.error_file = open("output/error{0}.txt".format(fold_num+1), "w")
+		self.write_config_file()
 
 		random.shuffle(training_data)
 		random.shuffle(testing_data)
@@ -174,15 +182,19 @@ class MLP(object):
 				self.testing(image)
 			self.avg_test_error = self.avg_test_error/self.test_number
 			#print("Erro quadratico medio dessa epoca de testes: {0}".format(self.erro_teste_medio))
-			self.error_file.write("{0};{1};{2}\n".format(i, self.avg_training_error, self.avg_test_error))
-
-			#if self.avg_test_error > self.previous_test_error:
+			self.error_file.write("{0};{1};{2}\n".format(i, self.avg_training_error, self.avg_test_error)) # Salva os erros quadraticos medios
+			
+			output.serialize_model(self.weights_0, self.weights_1)	#Serializacao dos pesos da epoca em questao para o arquivo Model.dat
+			
+			#if self.avg_test_error > self.previous_test_error:  #condicao de parada
 				#self.weights_0 = self.previous_weights_0
 				#self.weights_1 = self.previous_weights_1
 				#break
 			
-			self.alpha = self.alpha - (1 / self.epochs)
-			self.previous_test_error = self.avg_test_error
+			self.alpha = self.alpha - (1 / self.epochs) #atualizacao da taxa de aprendizado
+			self.previous_test_error = self.avg_test_error  #salva os erros anteriores
+
+			#zera as medias de erros quadraticos para a proxima epoca	
 			self.avg_training_error = 0
 			self.avg_test_error = 0	
 			self.test_number = 0

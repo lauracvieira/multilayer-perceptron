@@ -36,30 +36,30 @@ def getImages(path):
 
 	return files
 
-def calculateHog(image):
+def calculateHog(image, hog_orientations, hog_pixels_per_cell, hog_cell_per_block):
 	# http://scikit-image.org/docs/dev/api/skimage.feature.html#hog
 	return hog( 
 		image,
-		orientations=9,
-		pixels_per_cell=(8, 8),
-	    cells_per_block=(1, 1),
+		orientations= hog_orientations,
+		pixels_per_cell=(hog_pixels_per_cell, hog_pixels_per_cell),
+	    cells_per_block=(hog_cell_per_block, hog_cell_per_block),
 	    block_norm='L2-Hys'
 	)
 
-def calculateLBP(image):
+def calculateLBP(image, lbp_points, lbp_radius):
 	# http://scikit-image.org/docs/dev/api/skimage.feature.html#local-binary-pattern
 	return local_binary_pattern(
 		image,
-		P = 8,
-		R = 2,
+		P = lbp_points,
+		R = lbp_radius,
 		method='default'
 	)
 
-def getHog(image_name):
+def getHog(image_name, hog_orientations, hog_pixels_per_cell, hog_cell_per_block):
 	image = getImage(image_name)
-	return calculateHog(image)
+	return calculateHog(image, hog_orientations, hog_pixels_per_cell, hog_cell_per_block)
 
-def getLBP(image_name):
+def getLBP(image_name, lbp_points, lbp_radius):
 	image = getImage(image_name)
-	return calculateLBP(image)
+	return calculateLBP(image, lbp_points, lbp_radius)
 
