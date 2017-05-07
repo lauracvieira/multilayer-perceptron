@@ -9,7 +9,7 @@ from datetime import datetime
 
 
 class MLP(object):
-	def __init__(self, hidden_layer_neuron, alpha, classes_num, descriptor, path, epochs):
+	def __init__(self, hidden_layer_neuron, alpha, classes_num, descriptor, path, epochs, descriptor_param1, descriptor_param2, descriptor_param3):
 		self.path = path
 		self.bias = 1
 		self.alpha = alpha
@@ -23,6 +23,9 @@ class MLP(object):
 		self.previous_test_error = 10
 		self.previous_weights_0 = None
 		self.previous_weights_1 = None
+		self.descriptor_param1 = descriptor_param1
+		self.descriptor_param2 = descriptor_param2
+		self.descriptor_param3 = descriptor_param3
 
 		if self.descriptor == "HOG":
 			self.l0_neurons = 576
@@ -75,9 +78,9 @@ class MLP(object):
 		bias1 = self.bias
 
 		if self.descriptor == "HOG":
-			image = imagelib.getHog(self.path + image_name)
+			image = imagelib.getHog(self.path + image_name, self.descriptor_param1, self.descriptor_param2, self.descriptor_param3)
 		elif self.descriptor == "LBP":
-			image = imagelib.getLBP(self.path + image_name)
+			image = imagelib.getLBP(self.path + image_name, self.descriptor_param1, self.descriptor_param2)
 		
 		# prepara as camadas de entrada
 		mlp_input = np.array(image.reshape(1,np.size(image)))
