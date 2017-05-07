@@ -26,22 +26,30 @@ class MLP(object):
 		self.previous_test_error = 10
 		self.previous_weights_0 = None
 		self.previous_weights_1 = None
+
+		#parametros dos descritores de imagem
 		self.descriptor_param_1 = descriptor_param_1
 		self.descriptor_param_2 = descriptor_param_2
 		self.descriptor_param_3 = descriptor_param_3
 
-		if self.descriptor == "HOG":
-			self.l0_neurons = 576
-		elif descriptor == "LBP":
-			self.l0_neurons = 4096
-
-		self.weights_0 = funcoes.nguyen(self.l0_neurons, self.l1_neurons)
-		self.weights_1 = funcoes.nguyen(self.l1_neurons, self.l2_neurons)
+		#variaveis de calculo de erroƒ"./data/img_test.png"
 		self.avg_test_error = 0
 		self.test_number = 0
 		self.avg_training_error = 0
 		self.training_number = 0
 
+		#passagem de uma imagem de teste para o descritor escolhido 
+		#feito para capturar o tamanho da entrada da camada 0 com os parametros escolhidos e assim poder inicializar os pesos
+		if self.descriptor == "HOG":
+			image = imagelib.getHog("./data/img_test.png", self.descriptor_param_1, self.descriptor_param_2, self.descriptor_param_3)
+		elif self.descriptor == "LBP":
+			image = imagelib.getLBP("./data/img_test.png", self.descriptor_param_1, self.descriptor_param_2)
+		img_teste = np.array(image.reshape(1, np.size(image)))
+		self.l0_neurons = len(img_teste)
+
+		#inicializacao dos pesos
+		self.weights_0 = funcoes.nguyen(self.l0_neurons, self.l1_neurons)
+		self.weights_1 = funcoes.nguyen(self.l1_neurons, self.l2_neurons)
 
 	#sigmoid function - activation
 	def activFunction(self, x):
@@ -118,8 +126,8 @@ class MLP(object):
 		layer_1 = self.activFunction(np.dot(layer_0,weights_0) + bias_0) #->1x6 (1x576 por 576x6)
 		layer_2 = self.activFunction(np.dot(layer_1,weights_1) + bias_1).T #->1X3 (1x6 por 6x3)
 		y_error = (expected_output - layer_2) # 3x1 - 1X3(T) = 1X3
-		avg_y_error = np.mean(np.abs(y_error)) #erro médio de uma imagem
-		self.avg_training_error = self.avg_training_error + avg_y_error ** 2
+		avg_y_error = np.sum((y_error)**2)/2 #erro quadratico médio de uma imagem
+		self.avg_test_error = self.avg_test_error + avg_y_error
 		self.training_number = self.training_number + 1
 
 		#error layer 2
@@ -139,10 +147,7 @@ class MLP(object):
 		weights_0 += z_delta
 		self.weights_1 = weights_1
 		self.weights_0 = weights_0
-		
-		# print(weights_1)
-		# print(weights_0)
-		# print(layer_2)
+
 		np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
 		print("\n")
 
@@ -172,8 +177,8 @@ class MLP(object):
 		#error layer 2
 		expected_output = np.array(funcoes.get_output(image_name))
 		y_error = (expected_output - layer_2)
-		avg_y_error = np.mean(np.abs(y_error)) #erro médio de uma imagem
-		self.avg_test_error = self.avg_test_error + avg_y_error ** 2
+		avg_y_error = np.sum((y_error)**2)/2 #erro quadratico médio de uma imagem
+		self.avg_test_error = self.avg_test_error + avg_y_error
 		self.test_number = self.test_number + 1
 
 		# print(layer_2)
