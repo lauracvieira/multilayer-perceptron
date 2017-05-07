@@ -70,15 +70,15 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	descriptor = args.descriptor
 
-	epochs = 1
-	hidden_neurons = 32
-	alpha = 1.0
+	epochs = 5000
+	hidden_neurons = 140
+	alpha = 0.5
 
 	hog_orientations = 9
 	hog_pixels_per_cell = 8
 	hog_cells_per_block = 1
-	lbp_points = 8
-	lbp_radius = 2
+	lbp_points = 24
+	lbp_radius = 8
 
 	if descriptor in ['HOG', 'LBP']:
 		if descriptor == 'HOG':
