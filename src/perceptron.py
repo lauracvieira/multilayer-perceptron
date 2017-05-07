@@ -126,7 +126,7 @@ class MLP(object):
 		layer_2 = self.activFunction(np.dot(layer_1,weights_1) + bias_1).T #->1X3 (1x6 por 6x3)
 		y_error = (expected_output - layer_2) # 3x1 - 1X3(T) = 1X3
 		avg_y_error = np.sum((y_error)**2)/2 #erro quadratico médio de uma imagem
-		self.avg_test_error = self.avg_test_error + avg_y_error
+		self.avg_training_error = self.avg_training_error + avg_y_error
 		self.training_number = self.training_number + 1
 
 		#error layer 2
@@ -165,22 +165,22 @@ class MLP(object):
 		elif self.descriptor == "LBP":
 			image = imagelib.getLBP(self.path + image_name, self.descriptor_param_1, self.descriptor_param_2)
 
-		mlp_input = np.reshape(image, np.size(image))
-		l0_neurons = len(mlp_input)
+		mlp_input = np.array(image.reshape(1, np.size(image)))
+		self.l0_neurons = len(mlp_input)
+		expected_output = np.array(funcoes.get_output(image_name))
+
 
 		print ("TESTE IMAGE {}".format(funcoes.get_letter(image_name)))
 		layer_0 = mlp_input
 		layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
-		layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1)
+		layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
 
 		#error layer 2
-		expected_output = np.array(funcoes.get_output(image_name))
 		y_error = (expected_output - layer_2)
 		avg_y_error = np.sum((y_error)**2)/2 #erro quadratico médio de uma imagem
 		self.avg_test_error = self.avg_test_error + avg_y_error
 		self.test_number = self.test_number + 1
 
-		# print(layer_2)
 		np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
 		print("\n")
 
