@@ -82,21 +82,21 @@ def get_output(imageName,part2 = False):
 	return linha.T
 
 
-def serialize_model(weight_0, weight_1):
+def serialize_model(fold_num, weight_0, weight_1):
 	"""
 	Serialiização dos pesos no arquivo output/model.dat
 	"""
 	data = (weight_0, weight_1)
-	file = open('./output/model.dat', "wb")
+	file = open('./output/model_{0}.dat'.format(fold_num), "wb")
 	pickle.dump(data, file)
 	file.close()
 
 
-def de_serialize_model():
+def de_serialize_model(fold_num):
 	"""
 	Resgata os dados serializados no arquivo model.dat
 	"""
-	file = open('./output/model.dat', "rb")
+	file = open('./output/model_{0}.dat'.format(fold_num), "rb")
 	data = pickle.load(file)
 	file.close()
 	print(data)
@@ -148,7 +148,7 @@ def verify_error(lista_erros):
 	if len(lista_erros) < 5:
 		return False
 
-	return lista_erros[5] > lista_erros[4] > lista_erros[2] > lista_erros[1] > lista_erros[0]
+	return lista_erros[4] > lista_erros[3] > lista_erros[2] > lista_erros[1] > lista_erros[0]
 
 
 

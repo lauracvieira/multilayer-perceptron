@@ -191,8 +191,9 @@ class MLP(object):
 		"""
 		Método principal de execução do multilayer perceptron
 		"""
-		self.config_file = open("output/config{0}.txt".format(fold_num+1), "w")
-		self.error_file = open("output/error{0}.txt".format(fold_num+1), "w")
+		fold_num += 1
+		self.config_file = open("output/config_{0}.txt".format(fold_num), "w")
+		self.error_file = open("output/error_{0}.txt".format(fold_num), "w")
 		self.write_config_file()
 
 		random.shuffle(training_data)
@@ -200,7 +201,7 @@ class MLP(object):
 		self.error_file.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
 		print ("Kfold with {0} epochs started at: {1}".format(self.epochs,datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 		for i in range(self.epochs):
-			print ("--- EPOCH {0} --- ".format(i))
+			print ("--- EPOCH {0} OF FOLD {1}--- ".format(i, fold_num))
 			for image in training_data:
 				self.training(image)
 			self.avg_training_error = self.avg_training_error/self.training_number
@@ -210,7 +211,7 @@ class MLP(object):
 			self.avg_test_error = self.avg_test_error/self.test_number
 			self.error_file.write("{0};{1};{2}\n".format(i, self.avg_training_error, self.avg_test_error)) # Salva os erros quadraticos medios
 			self.avg_errors.append(self.avg_test_error)
-			funcoes.serialize_model(self.weights_0, self.weights_1)	#Serializacao dos pesos da epoca em questao para o arquivo Model.dat
+			funcoes.serialize_model(fold_num, self.weights_0, self.weights_1)	#Serializacao dos pesos da epoca em questao para o arquivo Model.dat
 			funcoes.add_error_list(self.avg_test_error, self.lista_erros)
 
 
@@ -223,7 +224,7 @@ class MLP(object):
 			self.test_number = 0
 			self.training_number = 0
 
-			if funcoes.verify_error(self.lista_erros) and i > 40:
+			if funcoes.verify_error(self.lista_erros) and i > 10:
 				break
 
 		total_mean = np.mean(self.avg_errors)
