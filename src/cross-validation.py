@@ -1,6 +1,7 @@
 import os
 import perceptron
 import argparse
+import parameters
 
 def classes(path):
 	"""
@@ -65,25 +66,11 @@ if __name__ == "__main__":
 	classes = classes(path)
 	dataset = dataset(classes)
 
-	parser = argparse.ArgumentParser(description='Choice of which image descriptor will be used in the MLP') 
-	parser.add_argument('--descriptor', '--desc', required= True, help="Choose descriptor HOG or LBP to use in the MLP")
-	args = parser.parse_args()
-	descriptor = args.descriptor
-
-	epochs = 5000
-	hidden_neurons = 140
-	alpha = 0.5
-
-	hog_orientations = 9
-	hog_pixels_per_cell = 8
-	hog_cells_per_block = 1
-	lbp_points = 24
-	lbp_radius = 8
-
-	if descriptor in ['HOG', 'LBP']:
-		if descriptor == 'HOG':
-			kfold(dataset, hidden_neurons, alpha, len(classes), descriptor, path, epochs, hog_orientations, hog_pixels_per_cell, hog_cells_per_block)
+	if parameters.descriptor in ['HOG', 'LBP']:
+		if parameters.descriptor == 'HOG':
+			kfold(dataset, parameters.hidden_neurons, parameters.alpha, len(classes), parameters.descriptor, path, parameters.epochs, parameters.hog_orientations, parameters.hog_pixels_per_cell, parameters.hog_cells_per_block)
 		elif descriptor == 'LBP':
-			kfold(dataset, hidden_neurons, alpha, len(classes), descriptor, path, epochs, lbp_points, lbp_radius)
+			kfold(dataset, parameters.hidden_neurons, parameters.alpha, len(classes), parameters.descriptor, path, parameters.epochs, parameters.lbp_points, parameters.lbp_radius)
 	else:
-		print("The descriptor should be 'HOG' or 'LBP'")
+		print("O descritor deve ser passado no arquivo de parametros e deve ser'HOG' ou 'LBP'")
+

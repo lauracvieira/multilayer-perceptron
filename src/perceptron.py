@@ -23,9 +23,11 @@ class MLP(object):
 		self.epochs = epochs
 		self.config_file = None
 		self.error_file = None
-		self.previous_test_error = 10
+		# self.previous_test_error = 10
 		self.previous_weights_0 = None
 		self.previous_weights_1 = None
+		self.lista_erros = list()
+		self.avg_errors = list()
 
 		#parametros dos descritores de imagem
 		self.descriptor_param_1 = descriptor_param_1
@@ -89,7 +91,8 @@ class MLP(object):
 		self.config_file.write("rede_camada_0_funcao_ativacao: sigmoide\n")
 		self.config_file.write("rede_inicializacao_pesos: nguyen-widrow\n")
 		self.config_file.write("rede_max_epocas: {0}\n".format(self.epochs))
-		self.config_file.write("rede_tecnica_ajuste_alpha: 'self.alpha - (1 / self.epochs)'\n\n")
+		self.config_file.write("rede_tecnica_ajuste_alpha: alpha - 0.001 para alpha maior que 0\n")
+		self.config_file.write("condicao_parada_rede: erro_medio_1 < erro_medio_2 < erro_medio_3 \n\n")
 
 
 	def training(self, image_name):
@@ -195,7 +198,7 @@ class MLP(object):
 		random.shuffle(training_data)
 		random.shuffle(testing_data)
 		self.error_file.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
-		print ("Kfold with N epochs started at: {0}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+		print ("Kfold with {0} epochs started at: {1}".format(self.epochs,datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 		for i in range(self.epochs):
 			print ("--- EPOCH {0} --- ".format(i))
 			for image in training_data:
@@ -206,16 +209,14 @@ class MLP(object):
 				self.testing(image)
 			self.avg_test_error = self.avg_test_error/self.test_number
 			self.error_file.write("{0};{1};{2}\n".format(i, self.avg_training_error, self.avg_test_error)) # Salva os erros quadraticos medios
-			
+			self.avg_errors.append(self.avg_test_error)
 			funcoes.serialize_model(self.weights_0, self.weights_1)	#Serializacao dos pesos da epoca em questao para o arquivo Model.dat
-			
-			#if self.avg_test_error > self.previous_test_error:  #condicao de parada
-				#self.weights_0 = self.previous_weights_0
-				#self.weights_1 = self.previous_weights_1
-				#break
-			if self.alpha - 0.001 >= 0:
+			funcoes.add_error_list(self.avg_test_error, self.lista_erros)
+
+
+			if self.alpha - 0.001 > 0 and i > 30:
 				self.alpha = self.alpha - 0.001 #atualizacao da taxa de aprendizado
-			self.previous_test_error = self.avg_test_error  #salva os erros anteriores
+			# self.previous_test_error = self.avg_test_error  #salva os erros anteriores
 
 			#zera as medias de erros quadraticos para a proxima epoca	
 			self.avg_training_error = 0
@@ -223,6 +224,13 @@ class MLP(object):
 			self.test_number = 0
 			self.training_number = 0
 
-		print ("Kfold with N epochs ended at: {0}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+			if funcoes.verify_error(self.lista_erros):
+				break
+
+		total_mean = np.mean(self.avg_errors)
+		std_dev = np.std(self.avg_errors)
+		self.config_file.write("media_total: {0}\n".format(total_mean))
+		self.config_file.write("desvio_padrao: {0}\n".format(std_dev))
+		print ("Kfold with {0} epochs ended at: {1}".format(self.epochs,datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 		self.config_file.close()
 		self.error_file.close()
