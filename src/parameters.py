@@ -1,0 +1,9 @@
+epochs = 5000
+hidden_neurons = 35
+alpha = 0.5
+descriptor = 'HOG'
+hog_orientations = 9
+hog_pixels_per_cell = 8
+hog_cells_per_block = 1
+lbp_points = 24
+lbp_radius = 8
