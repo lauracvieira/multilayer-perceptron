@@ -134,7 +134,7 @@ def add_error_list(valor, lista_erros):
 	"""
 	Remove e adiciona os erros relacionados à época atual e às duas épocas anteriores
 	"""
-	if len(lista_erros) == 3:
+	if len(lista_erros) == 5:
 		del lista_erros[0] # remove o primeiro valor
 	
 	lista_erros.append(valor) # adiciona novo valor na última posiçcão
@@ -145,10 +145,10 @@ def verify_error(lista_erros):
 	"""
 	Retorna True quando o erro é crescente em 3 épocas consecutivas
 	"""
-	if len(lista_erros) < 3:
+	if len(lista_erros) < 5:
 		return False
 
-	return lista_erros[2] > lista_erros[1] > lista_erros[0]
+	return lista_erros[5] > lista_erros[4] > lista_erros[2] > lista_erros[1] > lista_erros[0]
 
 
 
