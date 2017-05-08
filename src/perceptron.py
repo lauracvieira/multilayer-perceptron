@@ -92,7 +92,7 @@ class MLP(object):
 		self.config_file.write("rede_inicializacao_pesos: nguyen-widrow\n")
 		self.config_file.write("rede_max_epocas: {0}\n".format(self.epochs))
 		self.config_file.write("rede_tecnica_ajuste_alpha: alpha - 0.001 para alpha maior que 0\n")
-		self.config_file.write("condicao_parada_rede: erro_medio_1 < erro_medio_2 < erro_medio_3 \n\n")
+		self.config_file.write("condicao_parada_rede: erro_medio_1 < erro_medio_2 < erro_medio_3 < erro_medio_4 < erro_medio_5\n\n")
 
 
 	def training(self, image_name):
@@ -214,9 +214,8 @@ class MLP(object):
 			funcoes.add_error_list(self.avg_test_error, self.lista_erros)
 
 
-			if self.alpha - 0.001 > 0 and i > 30:
+			if self.alpha - 0.001 > 0:
 				self.alpha = self.alpha - 0.001 #atualizacao da taxa de aprendizado
-			# self.previous_test_error = self.avg_test_error  #salva os erros anteriores
 
 			#zera as medias de erros quadraticos para a proxima epoca	
 			self.avg_training_error = 0
@@ -224,7 +223,7 @@ class MLP(object):
 			self.test_number = 0
 			self.training_number = 0
 
-			if funcoes.verify_error(self.lista_erros):
+			if funcoes.verify_error(self.lista_erros) and i > 40:
 				break
 
 		total_mean = np.mean(self.avg_errors)
