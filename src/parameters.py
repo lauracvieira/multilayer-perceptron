@@ -1,7 +1,7 @@
 epochs = 5000
-hidden_neurons = 35
+hidden_neurons = 160
 alpha = 0.5
-descriptor = 'HOG'
+descriptor = 'LBP'
 hog_orientations = 9
 hog_pixels_per_cell = 8
 hog_cells_per_block = 1

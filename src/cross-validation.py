@@ -69,7 +69,7 @@ if __name__ == "__main__":
 	if parameters.descriptor in ['HOG', 'LBP']:
 		if parameters.descriptor == 'HOG':
 			kfold(dataset, parameters.hidden_neurons, parameters.alpha, len(classes), parameters.descriptor, path, parameters.epochs, parameters.hog_orientations, parameters.hog_pixels_per_cell, parameters.hog_cells_per_block)
-		elif descriptor == 'LBP':
+		elif parameters.descriptor == 'LBP':
 			kfold(dataset, parameters.hidden_neurons, parameters.alpha, len(classes), parameters.descriptor, path, parameters.epochs, parameters.lbp_points, parameters.lbp_radius)
 	else:
 		print("O descritor deve ser passado no arquivo de parametros e deve ser'HOG' ou 'LBP'")
