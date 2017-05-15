@@ -1,76 +1,76 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import os
 import perceptron
-import argparse
-import parameters
+import parameters as p
 
 def classes(path):
-	"""
-	Listagem das classes existentes no diretório
-	"""
-	classes = list()
+    """Listagem das classes existentes no diretório"""
+    classes = list()
 
-	for f in os.listdir(path):
-		if f[:8] not in classes:
-			classes.append(f[:8])
+    for f in os.listdir(p.WORKPATH):
+        if f[:8] not in classes:
+            classes.append(f[:8])
 
-	return classes
+    return classes
+
 
 def dataset(classes):
-	"""
-	Reúne os arquivos de cada classe em uma lista de listas
-	"""
-	dataset = list()
+    """Reúne os arquivos de cada classe em uma lista de listas"""
+    dataset = list()
 
-	for i in range(len(classes)):
-		files = [f for f in os.listdir(path) if f.startswith(classes[i])]
-		dataset.append(files)
+    for i in range(len(classes)):
+        files = [f for f in os.listdir(p.WORKPATH) if f.startswith(classes[i])]
+        dataset.append(files)
 
-	return dataset
+    return dataset
 
-def kfold(dataset, hidden_neurons, alpha, classes_num, descriptor, path, epochs, 
-		  descriptor_param1, descriptor_param2, descriptor_param3 = 0):
-	"""
-	Validação cruzada utilizando o mé todo k-fold
-	"""
 
-	# Define número de folds e tamanho do subset (que sempre vai ser igualmente dividido entre as classes)
-	num_folds = 5
-	subset_size = int(len(dataset[0])/num_folds)	
+def k_fold(dataset, hidden_neurons, alpha, classes_num, descriptor, path, epochs, 
+          descriptor_param1, descriptor_param2, descriptor_param3 = 0):
+    """Validação cruzada utilizando o mé todo k-fold"""
+    # definição do número de folds e tamanho do subset 
+    # (divisão proporcional entre número de folds e quantidade de arquivos por classe)
+    num_folds = 5
+    subset_size = int(len(dataset[0]) / num_folds)    
 
-	for fold_i in range(num_folds): 
-		testing_this_round = list()
-		training_this_round = list()
-		
-		for dataset_j in range(len(dataset)):
-			testing_this_round = testing_this_round + dataset[dataset_j][fold_i*subset_size:][:subset_size]      
-			training_this_round = training_this_round + dataset[dataset_j][:fold_i*subset_size] + dataset[dataset_j][(fold_i+1)*subset_size:]
-		
-
-		mlp = perceptron.MLP(hidden_neurons, alpha, classes_num, descriptor, path, epochs, descriptor_param1, descriptor_param2, descriptor_param3)
-		mlp.run(training_this_round, testing_this_round, fold_i)
+    for fold_i in range(num_folds): 
+        testing_this_round = list()
+        training_this_round = list()
+        
+        for dataset_j in range(len(dataset)):
+            testing_this_round += dataset[dataset_j][fold_i * subset_size:][:subset_size]      
+            training_this_round += dataset[dataset_j][:fold_i * subset_size] + \
+                dataset[dataset_j][(fold_i + 1) * subset_size:]
+        
+        mlp = perceptron.MLP(hidden_neurons, alpha, classes_num, descriptor, path, epochs, 
+            descriptor_param1, descriptor_param2, descriptor_param3)
+        mlp.run(training_this_round, testing_this_round, fold_i)
 
 def create_directories(directories):
-	"""
-	Criação dos diretórios
-	"""
-	for directory in directories:
-		try:
-		    os.stat('./{0}'.format(directory))
-		except:
-		    os.mkdir('./{0}'.format(directory))
+    """Criação dos diretórios"""
+    for directory in directories:
+        try:
+            os.stat('./' + directory)
+        except:
+            os.mkdir('./' + directory)
 
+
+# início da execução
 if __name__ == "__main__":
-	create_directories(['data', 'src', 'output'])
-	# Definição do diretório de trabalho
-	path = './data/dataset1/treinamento/'
-	classes = classes(path)
-	dataset = dataset(classes)
+    # diretórios, classes e dataset
+    create_directories(['data', 'src', 'output'])
+    classes = classes(p.WORKPATH)
+    dataset = dataset(classes)
 
-	if parameters.descriptor in ['HOG', 'LBP']:
-		if parameters.descriptor == 'HOG':
-			kfold(dataset, parameters.hidden_neurons, parameters.alpha, len(classes), parameters.descriptor, path, parameters.epochs, parameters.hog_orientations, parameters.hog_pixels_per_cell, parameters.hog_cells_per_block)
-		elif parameters.descriptor == 'LBP':
-			kfold(dataset, parameters.hidden_neurons, parameters.alpha, len(classes), parameters.descriptor, path, parameters.epochs, parameters.lbp_points, parameters.lbp_radius)
-	else:
-		print("O descritor deve ser passado no arquivo de parametros e deve ser'HOG' ou 'LBP'")
-
+    # chamada do k-fold com o descritor definido nos parâmetros
+    if p.DESCRIPTOR in ['HOG', 'LBP']:
+        if p.DESCRIPTOR == 'HOG':
+            k_fold(dataset, p.HIDDEN_NEURONS, p.ALPHA, len(classes), p.DESCRIPTOR, p.WORKPATH,
+                p.EPOCHS, p.HOG_ORIENTATIONS, p.HOG_PIXELS_PER_CELL, p.HOG_CELLS_PER_BLOCK)
+        elif p.DESCRIPTOR == 'LBP':
+            k_fold(dataset, p.HIDDEN_NEURONS, p.ALPHA, len(classes), p.DESCRIPTOR, p.WORKPATH,
+                p.EPOCHS, p.LBP_POINTS, p.LBP_RADIUS)
+    else:
+        print("O descritor deve ser passado no arquivo de parâmetros e pode ser apenas 'HOG' ou 'LBP'")
