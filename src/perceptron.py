@@ -3,6 +3,7 @@
 
 import numpy as np
 import funcoes as f
+import parameters as p
 import time
 import random
 import imagelib
@@ -125,7 +126,7 @@ class MLP(object):
         # camada de entrada: preparação
         mlp_input = np.array(image.reshape(1, np.size(image)))
         self.l0_neurons = len(mlp_input)
-        expected_output = np.array(f.get_output(image_name))
+        expected_output = np.array(f.get_output(image_name, p.PART_2))
 
         # pesos: cópia dos pesos antigos
         weights_0_previous = self.weights_0
@@ -164,7 +165,7 @@ class MLP(object):
         self.weights_1 = weights_1
         self.weights_0 = weights_0
 
-        print('Epoch: {0}\tTraining: {1}'.format(epoch, image_i + 1))
+        print('Epoch: {0}\tTraining: {1}'.format(str(epoch).zfill(4), str(image_i + 1).zfill(4)))
         np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
         print("\n")
 
@@ -185,9 +186,10 @@ class MLP(object):
 
         mlp_input = np.array(image.reshape(1, np.size(image)))
         self.l0_neurons = len(mlp_input)
-        expected_output = np.array(f.get_output(image_name))
+        expected_output = np.array(f.get_output(image_name, p.PART_2))
 
-        print ("Epoch: {0}\tTest: {1}\tImage: {2}".format(epoch, image_i + 1, f.get_letter(image_name)))
+        print ("Epoch: {0}\tTest: {1}\tImage: {2}".format(str(epoch).zfill(4), str(image_i + 1).zfill(4),
+         f.get_letter(image_name, p.PART_2)))
         layer_0 = mlp_input
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
@@ -218,26 +220,27 @@ class MLP(object):
         print ("\nK-Fold with {0} epochs started at: {1}\n".format(self.epochs, 
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
         
-        for i in range(self.epochs):
-            f.print_title_epoch(i, 'training')
+        for epoch_current in range(self.epochs):
+            f.print_title_epoch(epoch_current + 1, 'training', p.PART_2)
 
             # treinamento de 4/5 do fold
             for image_i, image in enumerate(training_data):
-                self.training(image, image_i, i)
+                self.training(image, image_i, epoch_current + 1)
             
             # erro médio de treinamento
             self.error_training_avg = self.error_training_avg / self.training_number
 
-            f.print_title_epoch(i, 'testing')
+            f.print_title_epoch(epoch_current + 1, 'testing', p.PART_2)
             # teste de 1/5 do fold
             for image_i, image in enumerate(testing_data):
-                self.testing(image, image_i, i)
+                self.testing(image, image_i, epoch_current + 1)
 
             # erro médio de teste
             self.error_test_avg = self.error_test_avg / self.test_number
 
              # gravação dos erros quadráticos médios
-            self.error_f.write("{0};{1};{2}\n".format(i, self.error_training_avg, self.error_test_avg))
+            self.error_f.write("{0};{1};{2}\n".format(epoch_current, self.error_training_avg,
+             self.error_test_avg))
             self.errors_avg.append(self.error_test_avg)
 
             # serialização dos pesos desta época (model.dat)
@@ -256,7 +259,7 @@ class MLP(object):
             self.test_number = 0
             self.training_number = 0
 
-            if f.stop_condition(self.errors_list) and i > 10:
+            if f.stop_condition(self.errors_list) and epoch_current > 10:
                 break
 
         # média total
