@@ -17,5 +17,11 @@ HOG_CELLS_PER_BLOCK = 1
 LBP_POINTS = 24
 LBP_RADIUS = 8
 
+# entrega 1 = False, entrega 2 = True
+PART_2 = not True
+
 # diretório dos datasets
-WORKPATH = './data/dataset1/treinamento/'
+if PART_2:
+	WORKPATH = './data/dataset2/treinamento/'
+else:
+	WORKPATH = './data/dataset1/treinamento/'
