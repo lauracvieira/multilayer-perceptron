@@ -36,73 +36,62 @@ def get_dataset(classes):
 
     return dataset
 
-def get_letter(image_name):
-    """Retorna a letra relacionada à classe do arquivo."""
-    classes = { 'train_41': 'A', 
-                'train_42': 'B',
-                'train_43': 'C', 
-                'train_44': 'D', 
-                'train_45': 'E', 
-                'train_46': 'F', 
-                'train_47': 'G', 
-                'train_48': 'H', 
-                'train_49': 'I', 
-                'train_4a': 'J', 
-                'train_4b': 'K', 
-                'train_4c': 'L', 
-                'train_4d': 'M', 
-                'train_4e': 'N',
-                'train_4f': 'O', 
-                'train_50': 'P', 
-                'train_51': 'Q', 
-                'train_52': 'R', 
-                'train_53': 'S', 
-                'train_54': 'T', 
-                'train_55': 'U', 
-                'train_56': 'V', 
-                'train_57': 'W', 
-                'train_58': 'X',
-                'train_59': 'Y', 
-                'train_5a': 'Z'}
 
-    return classes[image_name[:8]]
+def get_classes_dict(part_2):
+    """Retorna um dicionário contendo as letras das classes
+        correspondentes ao nome físico dos arquivos"""
+    if part_2:
+        classes = { 'train_41': 'A', 
+                    'train_42': 'B',
+                    'train_43': 'C', 
+                    'train_44': 'D', 
+                    'train_45': 'E', 
+                    'train_46': 'F', 
+                    'train_47': 'G', 
+                    'train_48': 'H', 
+                    'train_49': 'I', 
+                    'train_4a': 'J', 
+                    'train_4b': 'K', 
+                    'train_4c': 'L', 
+                    'train_4d': 'M', 
+                    'train_4e': 'N',
+                    'train_4f': 'O', 
+                    'train_50': 'P', 
+                    'train_51': 'Q', 
+                    'train_52': 'R', 
+                    'train_53': 'S', 
+                    'train_54': 'T', 
+                    'train_55': 'U', 
+                    'train_56': 'V', 
+                    'train_57': 'W', 
+                    'train_58': 'X',
+                    'train_59': 'Y', 
+                    'train_5a': 'Z'}
+    else:
+        classes = { 'train_53': 'S', 
+                    'train_58': 'X',
+                    'train_5a': 'Z'}
+    return classes
+
+
+def get_classes_list(part_2):
+    """Retorna lista contendo as letras das classes correspondentes à entrega"""
+    return list(get_classes_dict(part_2).values())
+
+
+def get_letter(image_name, part_2):
+    """Retorna a letra relacionada à classe do arquivo"""
+    return get_classes_dict(part_2)[image_name[:8]]
     
 
-def get_output(image_name, part_2=False):
-    """Retorna um vetor contendo configuração de saída esperada"""
-    if part_2:
-        letras = {  'A': 0, 
-                    'B': 1,
-                    'C': 2, 
-                    'D': 3, 
-                    'E': 4, 
-                    'F': 5, 
-                    'G': 6, 
-                    'H': 7, 
-                    'I': 8, 
-                    'J': 9, 
-                    'K': 10, 
-                    'L': 11, 
-                    'M': 12, 
-                    'N': 13,
-                    'O': 14, 
-                    'P': 15, 
-                    'Q': 16, 
-                    'R': 17, 
-                    'S': 18, 
-                    'T': 19, 
-                    'U': 20, 
-                    'V': 21, 
-                    'W': 22, 
-                    'X': 23,
-                    'Y': 24, 
-                    'Z': 25}
-    else:
-        letras = {  'S': 0, 
-                    'X': 1,
-                    'Z': 2}
+def get_output(image_name, part_2):
+    """Retorna um dicionário contendo a configuração de saída esperada"""
+    letras = {}
 
-    letra = get_letter(image_name)
+    for i, letter in (enumerate(get_classes_dict(part_2).values())):
+            letras[letter] = i
+
+    letra = get_letter(image_name, part_2)
 
     if part_2:
         output_matrix = np.matlib.identity(26)
@@ -177,15 +166,24 @@ def stop_condition(error_list):
     return error_list[4] > error_list[3] > error_list[2] > error_list[1] > error_list[0]
 
 
-def print_title_epoch(epoch, message):
+def print_title_epoch(epoch, message, part_2):
+    """Imprime cabeçalho contendo informações relevantes à rodada"""
     for i in range(100):
         print('-', end='')
+    else:
+        print()
 
-    print()
-
-    print(str.center('EPOCH {0} - {1}'.format(str(epoch).zfill(4), message.upper()), 100))
+    print(str.center('EPOCH {0} - {1} - {2} DELIVERY'.format(str(epoch).zfill(4), 
+        message.upper(), 'SECOND' if part_2 else 'FIRST'), 100))
     
+    message_2 = 'LETTERS: '
+
+    for c in get_classes_list(part_2):
+        message_2 += c + ' '
+    
+    print(str.center(message_2, 100))
+
     for i in range(100):
         print('-', end='')
-
-    print('\n')
+    else:
+        print('\n')
