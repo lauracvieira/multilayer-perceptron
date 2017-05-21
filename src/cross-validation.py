@@ -1,30 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
 import perceptron
 import parameters as p
-
-def classes(path):
-    """Listagem das classes existentes no diretório"""
-    classes = list()
-
-    for f in os.listdir(p.WORKPATH):
-        if f[:8] not in classes:
-            classes.append(f[:8])
-
-    return classes
-
-
-def dataset(classes):
-    """Reúne os arquivos de cada classe em uma lista de listas"""
-    dataset = list()
-
-    for i in range(len(classes)):
-        files = [f for f in os.listdir(p.WORKPATH) if f.startswith(classes[i])]
-        dataset.append(files)
-
-    return dataset
+import functions as f
 
 
 def k_fold(dataset, hidden_neurons, alpha, classes_num, descriptor, path, epochs, 
@@ -48,21 +27,13 @@ def k_fold(dataset, hidden_neurons, alpha, classes_num, descriptor, path, epochs
             descriptor_param1, descriptor_param2, descriptor_param3)
         mlp.run(training_this_round, testing_this_round, fold_i)
 
-def create_directories(directories):
-    """Criação dos diretórios"""
-    for directory in directories:
-        try:
-            os.stat('./' + directory)
-        except:
-            os.mkdir('./' + directory)
-
 
 # início da execução
 if __name__ == "__main__":
     # diretórios, classes e dataset
-    create_directories(['data', 'src', 'output'])
-    classes = classes(p.WORKPATH)
-    dataset = dataset(classes)
+    f.create_directories(['data', 'src', 'output'])
+    classes = f.get_classes()
+    dataset = f.get_dataset(classes)
 
     # chamada do k-fold com o descritor definido nos parâmetros
     if p.DESCRIPTOR in ['HOG', 'LBP']:

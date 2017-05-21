@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import funcoes as f
+import functions as f
 import time
 import random
 import imagelib

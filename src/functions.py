@@ -3,6 +3,38 @@
 
 import numpy as np
 import pickle
+import os
+import parameters as p
+
+def create_directories(directories):
+    """Criação dos diretórios"""
+    for directory in directories:
+        try:
+            os.stat('./' + directory)
+        except:
+            os.mkdir('./' + directory)
+
+
+def get_classes():
+    """Listagem das classes existentes no diretório"""
+    classes = list()
+
+    for f in os.listdir(p.WORKPATH):
+        if f[:8] not in classes:
+            classes.append(f[:8])
+
+    return classes
+
+
+def get_dataset(classes):
+    """Reúne os arquivos de cada classe em uma lista de listas"""
+    dataset = list()
+
+    for i in range(len(classes)):
+        files = [f for f in os.listdir(p.WORKPATH) if f.startswith(classes[i])]
+        dataset.append(files)
+
+    return dataset
 
 def get_letter(image_name):
     """Retorna a letra relacionada à classe do arquivo."""
