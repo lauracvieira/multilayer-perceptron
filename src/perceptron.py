@@ -14,6 +14,10 @@ class MLP(object):
     """Classe que representa a estrutura do multilayer perceptron"""
     def __init__(self, hidden_layer_neuron, alpha, classes_num, descriptor, path,
                  epochs, descriptor_param_1, descriptor_param_2, descriptor_param_3):
+        # tempo de execução
+        self.start = None
+        self.end = None
+        
         # diretório
         self.path = path
         
@@ -216,9 +220,11 @@ class MLP(object):
         random.shuffle(training_data)
         random.shuffle(testing_data)
 
+        self.start = datetime.now()
+
         self.error_f.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
         print ("\nK-Fold with {0} epochs started at: {1}\n".format(self.epochs, 
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+            self.start.strftime("%Y-%m-%d %H:%M:%S")))
         
         for epoch_current in range(self.epochs):
             f.print_title_epoch(epoch_current + 1, 'training', p.PART_2)
@@ -271,8 +277,15 @@ class MLP(object):
         self.config_f.write("media_total: {0}\n".format(mean_total))
         self.config_f.write("desvio_padrao: {0}\n".format(std_dev))
 
+        self.end = datetime.now()
+
+        print ("\nK-Fold with {0} epochs started at: {1}\n".format(self.epochs, 
+            self.start.strftime("%Y-%m-%d %H:%M:%S")))
+
         print ("\nK-Fold with {0} epochs ended at: {1}\n".format(self.epochs,
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+            self.end.strftime("%Y-%m-%d %H:%M:%S")))
+
+        print ("\nTime running: {0}\n".format(self.end - self.start))
         
         self.config_f.close()
         self.error_f.close()
