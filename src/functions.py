@@ -187,3 +187,26 @@ def print_title_epoch(epoch, message, part_2):
         print('-', end='')
     else:
         print('\n')
+
+def get_letter_from_num(letter_num, part_2):
+    letters = {}
+
+    for i, letter in (enumerate(get_classes_dict(part_2).values())):
+            letters[i] = letter
+
+    return letters[letter_num]
+
+def get_resulting_letter(layer_2, part_2):
+    """A partir dos resultados da ultima camada do perceptron, retorna a letra obtida no teste"""
+    greatest_output = 0
+    greatest_row = 0
+
+    for row in range(0, layer_2.shape[0]):
+        if layer_2[row][0] > greatest_output:
+            greatest_output = layer_2[row][0]
+            greatest_row = row
+
+    if greatest_output > 0.7:
+        return get_letter_from_num(greatest_row, part_2)
+    else:
+        return None

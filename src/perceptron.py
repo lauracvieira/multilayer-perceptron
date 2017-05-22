@@ -9,6 +9,7 @@ import random
 import imagelib
 import sys
 from datetime import datetime
+import pandas as pd
 
 class MLP(object):
     """Classe que representa a estrutura do multilayer perceptron"""
@@ -36,6 +37,8 @@ class MLP(object):
         # épocas
         self.epochs = epochs
 
+        #letras
+
         # arquivos
         self.config_f = None
         self.error_f = None
@@ -61,6 +64,10 @@ class MLP(object):
         self.test_number = 0
         self.error_training_avg = 0
         self.training_number = 0
+
+        #listas com resultados esperados e obtidos para a matriz de confusao
+        self.test_predicted = []
+        self.test_results = []
 
         # passagem de imagem de teste para o descritor escolhido 
         # feito para capturar o tamanho da entrada da camada 0 com os parâmetros escolhidos
@@ -198,6 +205,11 @@ class MLP(object):
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
 
+        resulting_letter = f.get_resulting_letter(layer_2, p.PART_2)
+        if resulting_letter != None:
+            self.test_predicted.append(f.get_letter(image_name, p.PART_2))
+            self.test_results.append(resulting_letter)
+
         # erros: segunda camada
         y_error = (expected_output - layer_2)
 
@@ -241,6 +253,12 @@ class MLP(object):
             for image_i, image in enumerate(testing_data):
                 self.testing(image, image_i, epoch_current + 1)
 
+            #Matriz de confusao
+            obtained = pd.Series(self.test_results, name='Obtained')
+            predicted = pd.Series(self.test_predicted, name='Predicted')
+            confusion_matrix = pd.crosstab(obtained, predicted)
+            print(confusion_matrix)
+            
             # erro médio de teste
             self.error_test_avg = self.error_test_avg / self.test_number
 

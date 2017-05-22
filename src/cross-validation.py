@@ -27,7 +27,6 @@ def k_fold(dataset, hidden_neurons, alpha, classes_num, descriptor, path, epochs
             descriptor_param1, descriptor_param2, descriptor_param3)
         mlp.run(training_this_round, testing_this_round, fold_i)
 
-
 # início da execução
 if __name__ == "__main__":
     # diretórios, classes e dataset
