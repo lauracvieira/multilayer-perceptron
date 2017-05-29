@@ -1,41 +1,47 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np
+from datetime import datetime
 import functions as f
-import parameters as p
-import time
-import random
 import imagelib
+import numpy as np
+import random
+import pandas as pd
+import parameters as p
 import sys
 from datetime import datetime
 import pandas as pd
+import time
 
 class MLP(object):
     """Classe que representa a estrutura do multilayer perceptron"""
-    def __init__(self, hidden_layer_neuron, alpha, classes_num, descriptor, path,
-                 epochs, descriptor_param_1, descriptor_param_2, descriptor_param_3):
+    def __init__(self, classes_num, parameters):
+        # 2ª entrega
+        self.part_2 = parameters['part_2']
+
         # tempo de execução
         self.start = None
         self.end = None
         
         # diretório
-        self.path = path
+        self.path = parameters['workpath']
         
         # bias
         self.bias = 1
 
         # alpha
-        self.alpha_initial = alpha
-        self.alpha = alpha
+        self.alpha_initial = parameters['alpha']
+        self.alpha = parameters['alpha']
         
         # neurônios das camadas
         self.l0_neurons = None
-        self.l1_neurons = hidden_layer_neuron
+        self.l1_neurons = parameters['hidden_neurons']
         self.l2_neurons = classes_num
         
         # épocas
-        self.epochs = epochs
+        self.epochs = parameters['epochs']
+
+        #letras
 
         #letras
 
@@ -52,12 +58,12 @@ class MLP(object):
         self.errors_avg = list()
 
         # descritor
-        self.descriptor = descriptor
+        self.descriptor = parameters['descriptor']
 
         # descritores de imagem: parâmetros
-        self.descriptor_param_1 = descriptor_param_1
-        self.descriptor_param_2 = descriptor_param_2
-        self.descriptor_param_3 = descriptor_param_3
+        self.descriptor_param_1 = parameters['descriptor_param_1']
+        self.descriptor_param_2 = parameters['descriptor_param_2']
+        self.descriptor_param_3 = parameters['descriptor_param_3']
 
         # erros da época 
         self.error_test_avg = 0
@@ -68,7 +74,7 @@ class MLP(object):
         #listas com resultados esperados e obtidos para a matriz de confusao
         self.test_predicted = []
         self.test_results = []
-
+        
         # passagem de imagem de teste para o descritor escolhido 
         # feito para capturar o tamanho da entrada da camada 0 com os parâmetros escolhidos
         # possibilitando a inicializaccão os pesos
@@ -78,6 +84,7 @@ class MLP(object):
         elif self.descriptor == "LBP":
             image = imagelib.getLBP("./data/img_test.png", self.descriptor_param_1, 
                 self.descriptor_param_2)
+
         self.l0_neurons = np.size(image)
 
         # pesos: inicialização
@@ -137,7 +144,7 @@ class MLP(object):
         # camada de entrada: preparação
         mlp_input = np.array(image.reshape(1, np.size(image)))
         self.l0_neurons = len(mlp_input)
-        expected_output = np.array(f.get_output(image_name, p.PART_2))
+        expected_output = np.array(f.get_output(image_name, self.part_2))
 
         # pesos: cópia dos pesos antigos
         weights_0_previous = self.weights_0
@@ -197,17 +204,17 @@ class MLP(object):
 
         mlp_input = np.array(image.reshape(1, np.size(image)))
         self.l0_neurons = len(mlp_input)
-        expected_output = np.array(f.get_output(image_name, p.PART_2))
+        expected_output = np.array(f.get_output(image_name, self.part_2))
 
-        print ("Epoch: {0}\tTest: {1}\tImage: {2}".format(str(epoch).zfill(4), str(image_i + 1).zfill(4),
-         f.get_letter(image_name, p.PART_2)))
+        print ("Epoch: {0}\tTest: {1}\tImage: {2}".format(str(epoch).zfill(4),
+            str(image_i + 1).zfill(4), f.get_letter(image_name, self.part_2)))
         layer_0 = mlp_input
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
 
-        resulting_letter = f.get_resulting_letter(layer_2, p.PART_2)
+        resulting_letter = f.get_resulting_letter(layer_2, self.part_2)
         if resulting_letter != None:
-            self.test_predicted.append(f.get_letter(image_name, p.PART_2))
+            self.test_predicted.append(f.get_letter(image_name, self.part_2))
             self.test_results.append(resulting_letter)
 
         # erros: segunda camada
@@ -239,7 +246,7 @@ class MLP(object):
             self.start.strftime("%Y-%m-%d %H:%M:%S")))
         
         for epoch_current in range(self.epochs):
-            f.print_title_epoch(epoch_current + 1, 'training', p.PART_2)
+            f.print_title_epoch(epoch_current + 1, 'training', self.part_2, self.descriptor)
 
             # treinamento de 4/5 do fold
             for image_i, image in enumerate(training_data):
@@ -248,7 +255,7 @@ class MLP(object):
             # erro médio de treinamento
             self.error_training_avg = self.error_training_avg / self.training_number
 
-            f.print_title_epoch(epoch_current + 1, 'testing', p.PART_2)
+            f.print_title_epoch(epoch_current + 1, 'testing', self.part_2, self.descriptor)
             # teste de 1/5 do fold
             for image_i, image in enumerate(testing_data):
                 self.testing(image, image_i, epoch_current + 1)

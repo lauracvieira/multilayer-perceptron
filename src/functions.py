@@ -166,7 +166,7 @@ def stop_condition(error_list):
     return error_list[4] > error_list[3] > error_list[2] > error_list[1] > error_list[0]
 
 
-def print_title_epoch(epoch, message, part_2):
+def print_title_epoch(epoch, message, part_2, descriptor):
     """Imprime cabeçalho contendo informações relevantes à rodada"""
     for i in range(100):
         print('-', end='')
@@ -175,6 +175,8 @@ def print_title_epoch(epoch, message, part_2):
 
     print(str.center('EPOCH {0} - {1} - {2} DELIVERY'.format(str(epoch).zfill(4), 
         message.upper(), 'SECOND' if part_2 else 'FIRST'), 100))
+
+    print(str.center('DESCRIPTOR: ' + descriptor, 100))
     
     message_2 = 'LETTERS: '
 
@@ -189,6 +191,7 @@ def print_title_epoch(epoch, message, part_2):
         print('\n')
 
 def get_letter_from_num(letter_num, part_2):
+    """Retorna a letra a partir do número"""
     letters = {}
 
     for i, letter in (enumerate(get_classes_dict(part_2).values())):
