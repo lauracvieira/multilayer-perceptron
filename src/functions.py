@@ -190,7 +190,6 @@ def print_title_epoch(epoch, message, part_2, descriptor):
     else:
         print('\n')
 
-
 def get_letter_from_num(letter_num, part_2):
     """Retorna a letra a partir do número"""
     letters = {}
@@ -199,7 +198,6 @@ def get_letter_from_num(letter_num, part_2):
             letters[i] = letter
 
     return letters[letter_num]
-
 
 def get_resulting_letter(layer_2, part_2):
     """A partir dos resultados da ultima camada do perceptron, retorna a letra obtida no teste"""

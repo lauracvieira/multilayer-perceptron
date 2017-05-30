@@ -38,7 +38,6 @@ def k_fold(dataset, classes_num, parameters):
         mlp = perceptron.MLP(classes_num, parameters)
         mlp.run(training_this_round, testing_this_round, fold_i)
 
-
 # início da execução
 if __name__ == "__main__":
     # descritor parâmetros, diretórios, classes e dataset

@@ -9,8 +9,9 @@ import random
 import pandas as pd
 import parameters as p
 import sys
+from datetime import datetime
+import pandas as pd
 import time
-
 
 class MLP(object):
     """Classe que representa a estrutura do multilayer perceptron"""
@@ -39,8 +40,7 @@ class MLP(object):
         
         # épocas
         self.epochs = parameters['epochs']
-
-        #letras
+        #self.last_epoch = 0
 
         # arquivos
         self.config_f = None
@@ -68,7 +68,7 @@ class MLP(object):
         self.error_training_avg = 0
         self.training_number = 0
 
-        #listas com resultados esperados e obtidos para a matriz de confusão
+        #listas com resultados esperados e obtidos para a matriz de confusao
         self.test_predicted = []
         self.test_results = []
         
@@ -180,12 +180,12 @@ class MLP(object):
         self.weights_1 = weights_1
         self.weights_0 = weights_0
 
-        print('Epoch: {0}\tTraining: {1}'.format(str(epoch).zfill(4), str(image_i + 1).zfill(4)))
-        np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
-        print("\n")
+        #print('Epoch: {0}\tTraining: {1}'.format(str(epoch).zfill(4), str(image_i + 1).zfill(4)))
+        #np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
+        #print("\n")
 
 
-    def testing(self, image_name, image_i, epoch):
+    def testing(self, image_name, image_i):
         """Método de teste da rede"""
         mlp_input = None
         image = None
@@ -203,8 +203,7 @@ class MLP(object):
         self.l0_neurons = len(mlp_input)
         expected_output = np.array(f.get_output(image_name, self.part_2))
 
-        print ("Epoch: {0}\tTest: {1}\tImage: {2}".format(str(epoch).zfill(4),
-            str(image_i + 1).zfill(4), f.get_letter(image_name, self.part_2)))
+        print ("Test: {0}\tImage: {1}".format(str(image_i + 1).zfill(4), f.get_letter(image_name, self.part_2)))
         layer_0 = mlp_input
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
@@ -241,7 +240,7 @@ class MLP(object):
         self.error_f.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
         print ("\nK-Fold with {0} epochs started at: {1}\n".format(self.epochs, 
             self.start.strftime("%Y-%m-%d %H:%M:%S")))
-        
+
         for epoch_current in range(self.epochs):
             f.print_title_epoch(epoch_current + 1, 'training', self.part_2, self.descriptor)
 
@@ -253,17 +252,10 @@ class MLP(object):
             self.error_training_avg = self.error_training_avg / self.training_number
 
             f.print_title_epoch(epoch_current + 1, 'testing', self.part_2, self.descriptor)
-            # teste de 1/5 do fold
-            for image_i, image in enumerate(testing_data):
-                self.testing(image, image_i, epoch_current + 1)
 
-            # erro médio de teste
-            self.error_test_avg = self.error_test_avg / self.test_number
-
-             # gravação dos erros quadráticos médios
-            self.error_f.write("{0};{1};{2}\n".format(epoch_current, self.error_training_avg,
-             self.error_test_avg))
-            self.errors_avg.append(self.error_test_avg)
+            # gravação dos erros quadráticos médios de treino
+            self.error_f.write("{0};{1};0\n".format(epoch_current, self.error_training_avg))
+            #self.errors_avg.append(self.error_test_avg)
 
             # serialização dos pesos desta época (model.dat)
             f.serialize_model(fold_num, self.weights_0, self.weights_1)
@@ -277,12 +269,31 @@ class MLP(object):
 
             # reinicialização as médias de erros quadráticos com 0 para a próxima época   
             self.error_training_avg = 0
-            self.error_test_avg = 0 
-            self.test_number = 0
+            #self.error_test_avg = 0 
+            #self.test_number = 0
             self.training_number = 0
 
-            if f.stop_condition(self.errors_list) and epoch_current > 10:
+            self.last_epoch = epoch_current
+            #if f.stop_condition(self.errors_list) and epoch_current > 10:
+
+            if epoch_current < 50:
                 break
+
+        # teste de 1/5 do fold
+        for image_i, image in enumerate(testing_data):
+            self.testing(image, image_i)
+
+        #Matriz de confusao
+        obtained = pd.Series(self.test_results, name='Esperado')
+        predicted = pd.Series(self.test_predicted, name='Obtido')
+        confusion_matrix = pd.crosstab(obtained, predicted)
+        print(confusion_matrix)
+        
+        # gravação dos erros quadráticos médios de teste
+        self.error_f.write("\n\n{0};0;{1}\n".format(self.last_epoch, self.error_test_avg))
+
+        # erro médio de teste
+        self.error_test_avg = self.error_test_avg / self.test_number
 
         # média total
         mean_total = np.mean(self.errors_avg)
