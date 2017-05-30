@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+from datetime import datetime
 import numpy as np
 import pickle
 import os
@@ -15,23 +15,23 @@ def create_directories(directories):
             os.mkdir('./' + directory)
 
 
-def get_classes():
+def get_classes(path):
     """Listagem das classes existentes no diretório"""
     classes = list()
 
-    for f in os.listdir(p.WORKPATH):
+    for f in os.listdir(path):
         if f[:8] not in classes:
             classes.append(f[:8])
 
     return classes
 
 
-def get_dataset(classes):
+def get_dataset(classes, path):
     """Reúne os arquivos de cada classe em uma lista de listas"""
     dataset = list()
 
     for i in range(len(classes)):
-        files = [f for f in os.listdir(p.WORKPATH) if f.startswith(classes[i])]
+        files = [f for f in os.listdir(path) if f.startswith(classes[i])]
         dataset.append(files)
 
     return dataset
@@ -121,6 +121,15 @@ def de_serialize_model():
     return data
 
 
+def de_serialize_dataset(dataset_type, part_2):
+    """Resgata o dataset serializado no arquivo dataset.p"""
+    f = open('./data/{}{}.p'.format(dataset_type, 1 if not part_2 else 2), "rb")
+    data = pickle.load(f)
+    f.close()
+
+    return data
+
+
 def initnw(inputs, outputs):
     """Inicialização dos pesos do Nguyen-Widrow"""
     ci = inputs
@@ -166,15 +175,18 @@ def stop_condition(error_list):
     return error_list[4] > error_list[3] > error_list[2] > error_list[1] > error_list[0]
 
 
-def print_title_epoch(epoch, message, part_2, descriptor):
+def print_title_epoch(epoch, message, part_2, descriptor, print_epoch=True):
     """Imprime cabeçalho contendo informações relevantes à rodada"""
     for i in range(100):
         print('-', end='')
     else:
         print()
-
-    print(str.center('EPOCH {0} - {1} - {2} DELIVERY'.format(str(epoch).zfill(4), 
-        message.upper(), 'SECOND' if part_2 else 'FIRST'), 100))
+    if print_epoch:
+        print(str.center('EPOCH {0} - {1} - {2} DELIVERY'.format(str(epoch).zfill(4), 
+            message.upper(), 'SECOND' if part_2 else 'FIRST'), 100))
+    else:
+        print(str.center('{} - {} DELIVERY'.format(message.upper(),
+         'SECOND' if part_2 else 'FIRST'), 100))
 
     print(str.center('DESCRIPTOR: ' + descriptor, 100))
     

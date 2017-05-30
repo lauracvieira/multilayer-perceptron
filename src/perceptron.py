@@ -9,8 +9,6 @@ import random
 import pandas as pd
 import parameters as p
 import sys
-from datetime import datetime
-import pandas as pd
 import time
 
 class MLP(object):
@@ -72,16 +70,11 @@ class MLP(object):
         self.test_predicted = []
         self.test_results = []
         
-        # passagem de imagem de teste para o descritor escolhido 
-        # feito para capturar o tamanho da entrada da camada 0 com os parâmetros escolhidos
+        # abertura do dataset serializado e leitura da matriz de descrição da imagem de teste 
+        # utilizada para capturar o tamanho da entrada da camada 0 com os parâmetros escolhidos
         # possibilitando a inicializaccão os pesos
-        if self.descriptor == "HOG":
-            image = imagelib.getHog("./data/img_test.png", self.descriptor_param_1, 
-                self.descriptor_param_2, self.descriptor_param_3)
-        elif self.descriptor == "LBP":
-            image = imagelib.getLBP("./data/img_test.png", self.descriptor_param_1, 
-                self.descriptor_param_2)
-
+        self.dataset = f.de_serialize_dataset(parameters['dataset_type'], self.part_2)
+        image = self.dataset.get('img_test.png').get(self.descriptor)
         self.l0_neurons = np.size(image)
 
         # pesos: inicialização
@@ -123,7 +116,7 @@ class MLP(object):
         self.config_f.write("condicao_parada_rede: erro_medio_1 < erro_medio_2 < erro_medio_3 < erro_medio_4 < erro_medio_5\n\n")
 
 
-    def training(self, image_name, image_i, epoch):
+    def training(self, image_name, image_i, epoch, fold_num):
         """Método de treinamento da rede"""
         mlp_input = None
         image = None
@@ -131,13 +124,8 @@ class MLP(object):
         bias_0 = self.bias
         bias_1 = self.bias
 
-        if self.descriptor == "HOG":
-            image = imagelib.getHog(self.path + image_name, self.descriptor_param_1, 
-                self.descriptor_param_2, self.descriptor_param_3)
-        elif self.descriptor == "LBP":
-            image = imagelib.getLBP(self.path + image_name, self.descriptor_param_1, 
-                self.descriptor_param_2)
-        
+        image = self.dataset.get(image_name).get(self.descriptor)
+
         # camada de entrada: preparação
         mlp_input = np.array(image.reshape(1, np.size(image)))
         self.l0_neurons = len(mlp_input)
@@ -180,9 +168,10 @@ class MLP(object):
         self.weights_1 = weights_1
         self.weights_0 = weights_0
 
-        #print('Epoch: {0}\tTraining: {1}'.format(str(epoch).zfill(4), str(image_i + 1).zfill(4)))
-        #np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
-        #print("\n")
+        print('Fold: {}\tEpoch: {}\tTraining: {}'.format(fold_num, str(epoch).zfill(4),
+            str(image_i + 1).zfill(4)))
+        np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
+        print("\n")
 
 
     def testing(self, image_name, image_i):
@@ -192,12 +181,7 @@ class MLP(object):
         bias_0 = self.bias
         bias_1 = self.bias
 
-        if self.descriptor == "HOG":
-            image = imagelib.getHog(self.path + image_name, self.descriptor_param_1, 
-                self.descriptor_param_2, self.descriptor_param_3)
-        elif self.descriptor == "LBP":
-            image = imagelib.getLBP(self.path + image_name, self.descriptor_param_1, 
-                self.descriptor_param_2)
+        image = self.dataset.get(image_name).get(self.descriptor)
 
         mlp_input = np.array(image.reshape(1, np.size(image)))
         self.l0_neurons = len(mlp_input)
@@ -238,7 +222,7 @@ class MLP(object):
         self.start = datetime.now()
 
         self.error_f.write("Execucao em {0} \n\n".format(time.strftime("%d/%m/%Y %H:%M")))
-        print ("\nK-Fold with {0} epochs started at: {1}\n".format(self.epochs, 
+        print ("\nK-Fold with max {0} epochs started at: {1}\n".format(self.epochs, 
             self.start.strftime("%Y-%m-%d %H:%M:%S")))
 
         for epoch_current in range(self.epochs):
@@ -246,12 +230,10 @@ class MLP(object):
 
             # treinamento de 4/5 do fold
             for image_i, image in enumerate(training_data):
-                self.training(image, image_i, epoch_current + 1)
+                self.training(image, image_i, epoch_current + 1, fold_num)
             
             # erro médio de treinamento
             self.error_training_avg = self.error_training_avg / self.training_number
-
-            f.print_title_epoch(epoch_current + 1, 'testing', self.part_2, self.descriptor)
 
             # gravação dos erros quadráticos médios de treino
             self.error_f.write("{0};{1};0\n".format(epoch_current, self.error_training_avg))
@@ -274,12 +256,12 @@ class MLP(object):
             self.training_number = 0
 
             self.last_epoch = epoch_current
+            
             #if f.stop_condition(self.errors_list) and epoch_current > 10:
-
-            if epoch_current < 50:
-                break
+            #     break
 
         # teste de 1/5 do fold
+        f.print_title_epoch(epoch_current + 1, 'testing', self.part_2, self.descriptor)        
         for image_i, image in enumerate(testing_data):
             self.testing(image, image_i)
 
@@ -306,13 +288,13 @@ class MLP(object):
 
         self.end = datetime.now()
 
-        print ("\nK-Fold with {0} epochs started at: {1}\n".format(self.epochs, 
+        print ("\nK-Fold {}/5:\tMax Epoch (s):  \t{}\tStart Time:\t{}".format(fold_num, self.epochs, 
             self.start.strftime("%Y-%m-%d %H:%M:%S")))
 
-        print ("\nK-Fold with {0} epochs ended at: {1}\n".format(self.epochs,
+        print ("K-Fold {}/5:\tTotal Epoch (s):\t{}\tEnd Time:\t{}".format(fold_num, epoch_current + 1,
             self.end.strftime("%Y-%m-%d %H:%M:%S")))
 
-        print ("\nTime running: {0}\n".format(self.end - self.start))
+        print ("K-Fold {}/5:\t\t\t\t\tRun. Time:\t{}\n".format(fold_num, self.end - self.start))
         
         self.config_f.close()
         self.error_f.close()

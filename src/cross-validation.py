@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from operator import xor
+
+from datetime import datetime
 import functions as f
 import parameters as p
 import perceptron
@@ -19,8 +20,21 @@ def get_descriptor():
         print("O descritor deve ser passado em linha de comando e pode ser apenas 'HOG' ou 'LBP'.")
         exit()
 
+def get_dataset_type():
+    if 'treinamento' in sys.argv and 'testes' in sys.argv:
+        print("Apenas um diretório de execução pode ser passado como parâmetro. Escolha 'treinamento' ou 'testes'.")
+        exit()
+
+    elif 'treinamento' in sys.argv:
+        return 'treinamento'
+    elif 'testes' in sys.argv:
+        return 'testes'
+    else:
+        print("O diretório de execução deve ser passado em linha de comando e pode ser apenas 'treinamento' ou 'testes'.")
+        exit()
+
 def k_fold(dataset, classes_num, parameters):
-    """Validação cruzada utilizando o mé todo k-fold"""
+    """Validação cruzada utilizando o método k-fold"""
     # definição do número de folds e tamanho do subset 
     # (divisão proporcional entre número de folds e quantidade de arquivos por classe)
     num_folds = 5
@@ -40,9 +54,12 @@ def k_fold(dataset, classes_num, parameters):
 
 # início da execução
 if __name__ == "__main__":
+    start = datetime.now()
     # descritor parâmetros, diretórios, classes e dataset
     descriptor = get_descriptor()
-    parameters = p.get_parameters(descriptor)
+    dataset_type = get_dataset_type()
+    parameters = p.get_parameters(descriptor, dataset_type, 'part2' in sys.argv)
     f.create_directories(['data', 'src', 'output'])
-    dataset = f.get_dataset(f.get_classes())
+    dataset = f.get_dataset(f.get_classes(parameters['workpath']), parameters['workpath'])
     k_fold(dataset, len(dataset), parameters)
+    print ("Total time running: \t\t\t\t\t\t{0}\n".format(datetime.now() - start))

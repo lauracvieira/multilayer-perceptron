@@ -4,29 +4,21 @@
 # arquivo de parâmetros
 
 # mlp
-EPOCHS = 5000
-HIDDEN_NEURONS = 32
-ALPHA = 0.5
+__EPOCHS = 50
+__ALPHA = 0.5
 
 # hog: parâmetros
-HOG_ORIENTATIONS = 9
-HOG_PIXELS_PER_CELL = 8
-HOG_CELLS_PER_BLOCK = 1
+__HIDDEN_NEURONS_LBP = 32
+__HOG_ORIENTATIONS = 9
+__HOG_PIXELS_PER_CELL = 8
+__HOG_CELLS_PER_BLOCK = 1
 
 # lbp: parâmetros
-LBP_POINTS = 24
-LBP_RADIUS = 8
+__HIDDEN_NEURONS_HOG = 160
+__LBP_POINTS = 24
+__LBP_RADIUS = 8
 
-# entrega 1 = False, entrega 2 = True
-PART_2 = not True
-
-# diretório dos datasets
-if PART_2:
-	WORKPATH = './data/dataset2/treinamento/'
-else:
-	WORKPATH = './data/dataset1/treinamento/'
-
-def get_parameters(descriptor):
+def get_parameters(descriptor, dataset_type, part_2):
     """Retorna um dicionário contendo os parâmetros de configuração do algoritmo e dos descritores""" 
     if descriptor not in ['HOG', 'LBP']:
         return None
@@ -34,20 +26,19 @@ def get_parameters(descriptor):
     p = {}
 
     p['descriptor'] = descriptor
-    p['epochs'] = EPOCHS 
-    p['hidden_neurons'] = HIDDEN_NEURONS
-    p['alpha'] = ALPHA 
-    p['workpath'] = WORKPATH
-    p['part_2'] = PART_2
+    p['epochs'] = __EPOCHS 
+    p['alpha'] = __ALPHA 
+    p['part_2'] = part_2
+    p['dataset_type'] = dataset_type
+    p['hidden_neurons'] = __HIDDEN_NEURONS_HOG if descriptor == 'HOG' else __HIDDEN_NEURONS_LBP
+    p['descriptor_param_1'] = __HOG_ORIENTATIONS if descriptor == 'HOG' else __LBP_POINTS
+    p['descriptor_param_2'] = __HOG_PIXELS_PER_CELL if descriptor == 'HOG' else __LBP_RADIUS
+    p['descriptor_param_3'] = __HOG_CELLS_PER_BLOCK if descriptor == 'HOG' else 0
 
-    if descriptor == 'HOG':
-        p['descriptor_param_1'] = HOG_ORIENTATIONS
-        p['descriptor_param_2'] = HOG_PIXELS_PER_CELL
-        p['descriptor_param_3'] = HOG_CELLS_PER_BLOCK
+    if part_2:
+        p['workpath'] = './data/dataset2/' + dataset_type + '/'
     else:
-        p['descriptor_param_1'] = LBP_POINTS
-        p['descriptor_param_2'] = LBP_RADIUS
-        p['descriptor_param_3'] = 0
+        p['workpath'] = './data/dataset1/' + dataset_type + '/'
 
     return p
 
