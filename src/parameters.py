@@ -4,12 +4,12 @@
 # arquivo de parâmetros
 
 # mlp
-__EPOCHS_MAX = 50
+__EPOCHS_MAX = 500
 __EPOCHS_MIN = 10
 __ALPHA = 0.5
 
 # stop condition
-__ERROR_MIN = 0.005
+__ERROR_MIN = 0.015
 __ALPHA_MIN = 0.001
 
 # hog: parâmetros
