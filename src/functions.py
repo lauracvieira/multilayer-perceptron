@@ -15,7 +15,7 @@ def create_directories(directories):
             os.mkdir('./' + directory)
 
 
-def get_classes(path):
+def get_classes_list(path):
     """Listagem das classes existentes no diretório"""
     classes = list()
 
@@ -26,7 +26,7 @@ def get_classes(path):
     return classes
 
 
-def get_dataset(classes, path):
+def get_dataset_list(classes, path):
     """Reúne os arquivos de cada classe em uma lista de listas"""
     dataset = list()
 
@@ -74,7 +74,7 @@ def get_classes_dict(part_2):
     return classes
 
 
-def get_classes_list(part_2):
+def get_classes_letters_list(part_2):
     """Retorna lista contendo as letras das classes correspondentes à entrega"""
     return list(get_classes_dict(part_2).values())
 
@@ -104,10 +104,10 @@ def get_output(image_name, part_2):
     return linha.T
 
 
-def serialize_model(fold_num, weight_0, weight_1):
+def serialize_model(fold_num, weight_0, weight_1, start_algorithm):
     """Serialiização dos pesos no arquivo output/model.dat"""
     data = (weight_0, weight_1)
-    f = open('./output/model_{0}.dat'.format(fold_num), "wb")
+    f = open('./output/model_{}_{}.dat'.format(fold_num, start_algorithm.strftime("%d%m%Y-%H%M")), "wb")
     pickle.dump(data, f)
     f.close()
 
@@ -157,7 +157,7 @@ def nguyen(inputs, outputs):
 
 def error_list_update(error, error_list):
     """Atualiza a lista de erros de forma circular para que ela contenha os erros das últimas 5 épocas"""
-    if len(error_list) == 5:
+    if len(error_list) == 4:
         # remove o erro mais antigo da lista
         del error_list[0]
 
@@ -167,12 +167,28 @@ def error_list_update(error, error_list):
     return error_list
 
 
-def stop_condition(error_list):
-    """Informa quando o erro é crescente por 5 épocas consecutivas"""
-    if len(error_list) < 5:
-        return False
+def stop_condition(error_list, epoch_current, alpha):
+    """Aciona parada quando o erro for menor que o erro mínimo
+        ou se o erro for crescente por 4 épocas consecutivas E tiver executado o número
+        mínimo de épocas estipulado nos parâmetros"""
+   
+    if len(error_list) < 4:
+        return 0
 
-    return error_list[4] > error_list[3] > error_list[2] > error_list[1] > error_list[0]
+    if error_list[-1] < p.get_error_min():
+        return 1
+
+    if alpha < p.get_alpha_min():
+        return 2
+
+    if epoch_current == p.get_epochs_max():
+        return 3
+
+    if (error_list[3] > error_list[2] > error_list[1] > error_list[0]) and \
+     (epoch_current > p.get_epochs_min()):
+        return 3
+
+    return 0
 
 
 def print_title_epoch(epoch, message, part_2, descriptor, print_epoch=True):
@@ -182,7 +198,7 @@ def print_title_epoch(epoch, message, part_2, descriptor, print_epoch=True):
     else:
         print()
     if print_epoch:
-        print(str.center('EPOCH {0} - {1} - {2} DELIVERY'.format(str(epoch).zfill(4), 
+        print(str.center('EPOCH {} - {} - {} DELIVERY'.format(str(epoch).zfill(4), 
             message.upper(), 'SECOND' if part_2 else 'FIRST'), 100))
     else:
         print(str.center('{} - {} DELIVERY'.format(message.upper(),
@@ -192,7 +208,7 @@ def print_title_epoch(epoch, message, part_2, descriptor, print_epoch=True):
     
     message_2 = 'LETTERS: '
 
-    for c in get_classes_list(part_2):
+    for c in get_classes_letters_list(part_2):
         message_2 += c + ' '
     
     print(str.center(message_2, 100))

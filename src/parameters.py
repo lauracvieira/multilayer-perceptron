@@ -4,19 +4,25 @@
 # arquivo de parâmetros
 
 # mlp
-__EPOCHS = 50
+__EPOCHS_MAX = 50
+__EPOCHS_MIN = 10
 __ALPHA = 0.5
 
+# stop condition
+__ERROR_MIN = 0.005
+__ALPHA_MIN = 0.001
+
 # hog: parâmetros
-__HIDDEN_NEURONS_LBP = 32
+__HIDDEN_NEURONS_HOG = 32
 __HOG_ORIENTATIONS = 9
 __HOG_PIXELS_PER_CELL = 8
 __HOG_CELLS_PER_BLOCK = 1
 
 # lbp: parâmetros
-__HIDDEN_NEURONS_HOG = 160
+__HIDDEN_NEURONS_LBP= 160
 __LBP_POINTS = 24
 __LBP_RADIUS = 8
+
 
 def get_parameters(descriptor, dataset_type, part_2):
     """Retorna um dicionário contendo os parâmetros de configuração do algoritmo e dos descritores""" 
@@ -26,7 +32,7 @@ def get_parameters(descriptor, dataset_type, part_2):
     p = {}
 
     p['descriptor'] = descriptor
-    p['epochs'] = __EPOCHS 
+    p['epochs'] = __EPOCHS_MAX
     p['alpha'] = __ALPHA 
     p['part_2'] = part_2
     p['dataset_type'] = dataset_type
@@ -42,5 +48,15 @@ def get_parameters(descriptor, dataset_type, part_2):
 
     return p
 
+def get_error_min():
+    return __ERROR_MIN
 
-    
+def get_epochs_min():
+    return __EPOCHS_MIN
+
+def get_epochs_max():
+    return __EPOCHS_MAX
+
+def get_alpha_min():
+    return __ALPHA_MIN
+

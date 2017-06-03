@@ -5,7 +5,7 @@ from datetime import datetime
 import functions as f
 import imagelib as imagelib
 import parameters as p
-import pickle
+import _pickle as pickle
 import sys
 
 def run():
@@ -50,7 +50,7 @@ def run():
     else:
         print('{}. Teste image img_test.png described by HOG and LBP.'.format(str(0).zfill(5)))
 
-    dataset = f.get_dataset(f.get_classes(hog.get('workpath')), hog.get('workpath'))
+    dataset = f.get_dataset_list(f.get_classes_list(hog.get('workpath')), hog.get('workpath'))
     count = 1
 
     for line in dataset:
