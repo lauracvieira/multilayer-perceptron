@@ -186,7 +186,7 @@ def stop_condition(error_list, epoch_current, alpha):
 
     if (error_list[3] > error_list[2] > error_list[1] > error_list[0]) and \
      (epoch_current > p.get_epochs_min()):
-        return 3
+        return 4
 
     return 0
 
