@@ -122,8 +122,17 @@ def de_serialize_model():
 
 
 def de_serialize_dataset(part_2):
-    """Resgata o dataset serializado no arquivo dataset.p"""
+    """Resgata o dataset serializado no arquivo treinamento{}.p"""
     f = open('./data/treinamento{}.p'.format(1 if not part_2 else 2), "rb")
+    data = pickle.load(f)
+    f.close()
+
+    return data
+
+
+def de_serialize_test(part_2):
+    """Resgata o dataset serializado no arquivo testes{}.p"""
+    f = open('./data/testes{}.p'.format(1 if not part_2 else 2), "rb")
     data = pickle.load(f)
     f.close()
 

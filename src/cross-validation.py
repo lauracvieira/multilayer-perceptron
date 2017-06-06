@@ -40,6 +40,10 @@ def k_fold(dataset, classes_num, parameters, start_algorithm):
 
         mlp = perceptron.MLP(classes_num, parameters, dataset_described, start_algorithm)
         mlp.run(training_this_round, testing_this_round, fold_i)
+        # acho que a chamada desse método não vai aqui, mas é aqui que a MLP está instanciada, então deixei aqui.
+        # se precisar mudar, possivelmente vamos ter que instanciar a rede antes de chamar o k_fold e passar os parâmetros
+        # de inicialização através de um getter. decidam-se e me falem. 
+        # mlp.confusion_matrix(parameters['part_2'])
 
 # início da execução
 if __name__ == "__main__":

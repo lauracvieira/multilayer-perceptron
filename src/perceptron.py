@@ -211,6 +211,11 @@ class MLP(object):
         np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
         print("\n")
 
+    def confusion_matrix(self, part_2):
+        dataset_test = de_serialize_test(part_2)
+
+        #todo have fun, Laura!
+
     def run(self, training_data, testing_data, fold_num):
         """Método principal de execução do multilayer perceptron"""
         fold_num = fold_num + 1
