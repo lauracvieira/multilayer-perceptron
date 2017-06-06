@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-import functions as f
+import utils as u
 import parameters as p
 import perceptron
 import sys
@@ -20,19 +20,6 @@ def get_descriptor():
         print("O descritor deve ser passado em linha de comando e pode ser apenas 'HOG' ou 'LBP'.")
         exit()
 
-def get_dataset_type():
-    if 'treinamento' in sys.argv and 'testes' in sys.argv:
-        print("Apenas um diretório de execução pode ser passado como parâmetro. Escolha 'treinamento' ou 'testes'.")
-        exit()
-
-    elif 'treinamento' in sys.argv:
-        return 'treinamento'
-    elif 'testes' in sys.argv:
-        return 'testes'
-    else:
-        print("O diretório de execução deve ser passado em linha de comando e pode ser apenas 'treinamento' ou 'testes'.")
-        exit()
-
 def k_fold(dataset, classes_num, parameters, start_algorithm):
     """Validação cruzada utilizando o método k-fold"""
     # definição do número de folds e tamanho do subset 
@@ -40,7 +27,7 @@ def k_fold(dataset, classes_num, parameters, start_algorithm):
     num_folds = 5
     subset_size = int(len(dataset[0]) / num_folds)
 
-    dataset_described = f.de_serialize_dataset(parameters['dataset_type'], parameters['part_2'])    
+    dataset_described = u.de_serialize_dataset(parameters['part_2'])    
 
     for fold_i in range(num_folds): 
         testing_this_round = list()
@@ -59,9 +46,8 @@ if __name__ == "__main__":
     # horário de execução, descritor, parâmetros, diretórios, lista de classes e lista de dataset
     start_algorithm = datetime.now()
     descriptor = get_descriptor()
-    dataset_type = get_dataset_type()
-    parameters = p.get_parameters(descriptor, dataset_type, 'part2' in sys.argv)
-    f.create_directories(['data', 'src', 'output'])
-    dataset = f.get_dataset_list(f.get_classes_list(parameters['workpath']), parameters['workpath'])
+    parameters = p.get_parameters(descriptor, 'part2' in sys.argv)
+    u.create_directories(['data', 'src', 'output'])
+    dataset = u.get_dataset_list(u.get_classes_list(parameters['workpath']), parameters['workpath'])
     k_fold(dataset, len(dataset), parameters, start_algorithm)
     print ("Total time running: \t\t\t\t\t\t{}\n".format(datetime.now() - start_algorithm))

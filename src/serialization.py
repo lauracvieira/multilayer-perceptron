@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-import functions as f
+import utils as u
 import imagelib as imagelib
 import parameters as p
-import _pickle as pickle
+import pickle as pickle
 import sys
 
 def run():
@@ -27,8 +27,8 @@ def run():
         exit()   
 
 
-    hog = p.get_parameters('HOG', dataset_type, 'part2' in sys.argv)
-    lbp = p.get_parameters('LBP', dataset_type, 'part2' in sys.argv)
+    hog = p.get_parameters('HOG', 'part2' in sys.argv)
+    lbp = p.get_parameters('LBP', 'part2' in sys.argv)
 
     images = {}
 
@@ -50,7 +50,7 @@ def run():
     else:
         print('{}. Teste image img_test.png described by HOG and LBP.'.format(str(0).zfill(5)))
 
-    dataset = f.get_dataset_list(f.get_classes_list(hog.get('workpath')), hog.get('workpath'))
+    dataset = u.get_dataset_list(u.get_classes_list(hog.get('workpath')), hog.get('workpath'))
     count = 1
 
     for line in dataset:
