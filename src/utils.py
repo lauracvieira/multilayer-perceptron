@@ -121,9 +121,9 @@ def de_serialize_model():
     return data
 
 
-def de_serialize_dataset(dataset_type, part_2):
+def de_serialize_dataset(part_2):
     """Resgata o dataset serializado no arquivo dataset.p"""
-    f = open('./data/{}{}.p'.format(dataset_type, 1 if not part_2 else 2), "rb")
+    f = open('./data/treinamento{}.p'.format(1 if not part_2 else 2), "rb")
     data = pickle.load(f)
     f.close()
 
@@ -191,14 +191,14 @@ def stop_condition(error_list, epoch_current, alpha):
     return 0
 
 
-def print_title_epoch(epoch, message, part_2, descriptor, print_epoch=True):
+def print_title_epoch(epoch, fold_num, message, part_2, descriptor, print_epoch=True):
     """Imprime cabeçalho contendo informações relevantes à rodada"""
     for i in range(100):
         print('-', end='')
     else:
         print()
     if print_epoch:
-        print(str.center('EPOCH {} - {} - {} DELIVERY'.format(str(epoch).zfill(4), 
+        print(str.center('FOLD {} - EPOCH {} - {} - {} DELIVERY'.format(fold_num, str(epoch).zfill(4), 
             message.upper(), 'SECOND' if part_2 else 'FIRST'), 100))
     else:
         print(str.center('{} - {} DELIVERY'.format(message.upper(),

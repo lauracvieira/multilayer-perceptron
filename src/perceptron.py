@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-import functions as f
+import utils as u
 import imagelib
 import numpy as np
 import random
@@ -78,8 +78,8 @@ class MLP(object):
         self.l0_neurons = np.size(image)
 
         # pesos: inicialização
-        self.weights_0 = f.nguyen(self.l0_neurons, self.l1_neurons)
-        self.weights_1 = f.nguyen(self.l1_neurons, self.l2_neurons)
+        self.weights_0 = u.nguyen(self.l0_neurons, self.l1_neurons)
+        self.weights_1 = u.nguyen(self.l1_neurons, self.l2_neurons)
 
 
     def activFunction(self, x):
@@ -128,7 +128,7 @@ class MLP(object):
         # camada de entrada: preparação
         mlp_input = np.array(image.reshape(1, np.size(image)))
         self.l0_neurons = len(mlp_input)
-        expected_output = np.array(f.get_output(image_name, self.part_2))
+        expected_output = np.array(u.get_output(image_name, self.part_2))
 
         # pesos: cópia dos pesos antigos
         weights_0_previous = self.weights_0
@@ -172,7 +172,7 @@ class MLP(object):
         self.bias_1 = bias_1
 
         print('Fold: {}\tEpoch: {}\tTraining: {}'.format(fold_num, str(epoch).zfill(4),
-            str(image_i + 1).zfill(4)))
+           str(image_i + 1).zfill(4)))
         np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
         print("\n")
 
@@ -188,16 +188,16 @@ class MLP(object):
 
         mlp_input = np.array(image.reshape(1, np.size(image)))
         self.l0_neurons = len(mlp_input)
-        expected_output = np.array(f.get_output(image_name, self.part_2))
+        expected_output = np.array(u.get_output(image_name, self.part_2))
 
-        print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4), f.get_letter(image_name, self.part_2)))
+        #print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4), u.get_letter(image_name, self.part_2)))
         layer_0 = mlp_input
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
 
-        resulting_letter = f.get_resulting_letter(layer_2, self.part_2)
+        resulting_letter = u.get_resulting_letter(layer_2, self.part_2)
         if resulting_letter != None:
-            self.test_predicted.append(f.get_letter(image_name, self.part_2))
+            self.test_predicted.append(u.get_letter(image_name, self.part_2))
             self.test_results.append(resulting_letter)
 
         # erros: segunda camada
@@ -229,7 +229,7 @@ class MLP(object):
             self.start_fold.strftime("%Y-%m-%d %H:%M:%S")))
 
         for epoch_current in range(self.epochs):
-            f.print_title_epoch(epoch_current + 1, 'training', self.part_2, self.descriptor)
+            u.print_title_epoch(epoch_current + 1, fold_num, 'training', self.part_2, self.descriptor)
 
             # treinamento de 4/5 do fold
             for image_i, image in enumerate(training_data):
@@ -239,10 +239,10 @@ class MLP(object):
             self.error_training_avg = self.error_training_avg / self.training_number
   
             # serialização dos pesos desta época (model.dat)
-            f.serialize_model(fold_num, self.weights_0, self.weights_1, self.start_algorithm)
+            u.serialize_model(fold_num, self.weights_0, self.weights_1, self.start_algorithm)
 
             # teste de 1/5 do fold
-            f.print_title_epoch(epoch_current + 1, 'testing', self.part_2, self.descriptor)        
+            u.print_title_epoch(epoch_current + 1, fold_num,'testing', self.part_2, self.descriptor)        
             for image_i, image in enumerate(testing_data):
                 self.testing(image, image_i)
 
@@ -253,7 +253,7 @@ class MLP(object):
             self.errors_test_avg_list.append(self.error_test_avg)
 
             # atualização da lista de erros
-            f.error_list_update(self.error_test_avg, self.errors_list)
+            u.error_list_update(self.error_test_avg, self.errors_list)
             
             # gravação dos erros quadráticos médios
             self.error_f.write("{};{};{}\n".format(epoch_current, self.error_training_avg,
@@ -270,7 +270,7 @@ class MLP(object):
                 self.alpha = self.alpha - 0.001
 
             # condicao de parada por erro
-            stop_condition = f.stop_condition(self.errors_list, epoch_current, self.alpha)
+            stop_condition = u.stop_condition(self.errors_list, epoch_current, self.alpha)
             if stop_condition:
                 break
 
