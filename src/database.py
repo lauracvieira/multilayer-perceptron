@@ -11,6 +11,12 @@ import sys
 import time
 
 def run():
+    if sys.platform == 'win32':
+        barvalue = '#'
+    else:
+        bar_value  = '█'
+
+
     start = datetime.now()
     path = './data/database.db'
     conn = sqlite3.connect(path)
@@ -48,7 +54,7 @@ def run():
 
     for line in dataset:
         widgets = ['Training Letter: {} | '.format(u.get_letter(line[0], True)), progressbar.Percentage(), 
-        ' (', progressbar.Counter(), ' of ',  str(len(line)), ') ', progressbar.Bar('█'), '  ',progressbar.ETA()]
+        ' (', progressbar.Counter(), ' of ',  str(len(line)), ') ', progressbar.Bar(bar_value), '  ',progressbar.ETA()]
         with progressbar.ProgressBar(widgets=widgets, max_value=len(line)) as bar:
             for i, name in enumerate(line):
                 values = {}
@@ -73,7 +79,7 @@ def run():
 
     for line in dataset:
         widgets = ['Testing Letter: {} | '.format(u.get_letter(line[0], True)), progressbar.Percentage(), 
-        ' (', progressbar.Counter(), ' of ',  str(len(line)), ') ', progressbar.Bar('█'), '  ',progressbar.ETA()]
+        ' (', progressbar.Counter(), ' of ',  str(len(line)), ') ', progressbar.Bar(bar_value), '  ',progressbar.ETA()]
         with progressbar.ProgressBar(widgets=widgets, max_value=len(line)) as bar:
             for i, name in enumerate(line):
                 values = {}
