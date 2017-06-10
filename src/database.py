@@ -86,7 +86,7 @@ def run():
                     values['LBP'] = imagelib.getLBP(lbp['testpath'] + name, lbp['descriptor_param_1'], 
                         lbp['descriptor_param_2'])
 
-                    c.execute('INSERT OR IGNORE INTO values VALUES (?, ?, ?)', [name, values['HOG'], values['LBP']])
+                    c.execute('INSERT OR IGNORE INTO testes VALUES (?, ?, ?)', [name, values['HOG'], values['LBP']])
                 except Exception:
                     raise
 
