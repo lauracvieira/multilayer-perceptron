@@ -41,7 +41,8 @@ def get_classes_dict(part_2):
     """Retorna um dicionário contendo as letras das classes
         correspondentes ao nome físico dos arquivos"""
     if part_2:
-        classes = { 'train_41': 'A', 
+        classes = { 
+                    'train_41': 'A', 
                     'train_42': 'B',
                     'train_43': 'C', 
                     'train_44': 'D', 
@@ -66,11 +67,14 @@ def get_classes_dict(part_2):
                     'train_57': 'W', 
                     'train_58': 'X',
                     'train_59': 'Y', 
-                    'train_5a': 'Z'}
+                    'train_5a': 'Z'
+                    }
     else:
-        classes = { 'train_53': 'S', 
+        classes = { 
+                    'train_53': 'S', 
                     'train_58': 'X',
-                    'train_5a': 'Z'}
+                    'train_5a': 'Z'
+                    }
     return classes
 
 
@@ -104,39 +108,13 @@ def get_output(image_name, part_2):
     return linha.T
 
 
-def serialize_model(fold_num, weight_0, weight_1, start_algorithm):
+def serialize_model(fold_num, weight_0, weight_1, start_algorithm, descriptor):
     """Serialiização dos pesos no arquivo output/model.dat"""
     data = (weight_0, weight_1)
-    f = open('./output/model_{}_{}.dat'.format(fold_num, start_algorithm.strftime("%d%m%Y-%H%M")), "wb")
+    f = open('./output/model_{}_{}_{}.dat'.format(fold_num, 
+        start_algorithm.strftime("%d%m%Y-%H%M"), descriptor), "wb")
     pickle.dump(data, f)
     f.close()
-
-
-def de_serialize_model():
-    """Resgata os dados serializados no arquivo model.dat"""
-    f = open('./output/model.dat', "rb")
-    data = pickle.load(f)
-    f.close()
-
-    return data
-
-
-def de_serialize_dataset(part_2):
-    """Resgata o dataset serializado no arquivo treinamento{}.p"""
-    f = open('./data/treinamento{}.p'.format(1 if not part_2 else 2), "rb")
-    data = pickle.load(f)
-    f.close()
-
-    return data
-
-
-def de_serialize_test(part_2):
-    """Resgata o dataset serializado no arquivo testes{}.p"""
-    f = open('./data/testes{}.p'.format(1 if not part_2 else 2), "rb")
-    data = pickle.load(f)
-    f.close()
-
-    return data
 
 
 def initnw(inputs, outputs):
@@ -180,24 +158,33 @@ def stop_condition(error_list, epoch_current, alpha):
     """Aciona parada quando o erro for menor que o erro mínimo
         ou se o erro for crescente por 4 épocas consecutivas E tiver executado o número
         mínimo de épocas estipulado nos parâmetros"""
-   
+    condition = {'result' : 0}
+
     if len(error_list) < 4:
-        return 0
+        return condition
 
     if error_list[-1] < p.get_error_min():
-        return 1
+        condition['result'] = 1
+        condition['message'] = 'erro quadrático médio alcançou o valor mínimo'
+        return condition
 
     if alpha < p.get_alpha_min():
-        return 2
+        condition['result'] = 2
+        condition['message'] = 'alpha mínimo alcançado'
+        return condition
 
     if epoch_current == p.get_epochs_max():
-        return 3
+        condition['result'] = 3
+        condition['message'] = 'número máximo de épocas alcançado' 
+        return condition
 
     if (error_list[3] > error_list[2] > error_list[1] > error_list[0]) and \
      (epoch_current > p.get_epochs_min()):
-        return 4
+        condition['result'] = 4
+        condition['message'] = 'crescimento sucessivo da taxa de erro quadrática média por 4 épocas'
+        return condition
 
-    return 0
+    return condition
 
 
 def print_title_epoch(epoch, fold_num, message, part_2, descriptor, print_epoch=True):

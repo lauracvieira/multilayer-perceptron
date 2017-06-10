@@ -241,8 +241,10 @@ class MLP(object):
     def run(self, training_data, testing_data, fold_num):
         """Método principal de execução do multilayer perceptron"""
         fold_num = fold_num + 1
-        self.config_f = open("output/config_{}_{}.txt".format(fold_num, self.start_algorithm.strftime("%d%m%Y-%H%M")), "w")
-        self.error_f = open("output/error_{}_{}.txt".format(fold_num, self.start_algorithm.strftime("%d%m%Y-%H%M")), "w")
+        self.config_f = open("output/config_{}_{}_{}.txt".format(fold_num, 
+            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor), "w")
+        self.error_f = open("output/error_{}_{}_{}.txt".format(fold_num, 
+            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor), "w")
         self.config_write()
 
         # Torna aleatória a lista de arquivos para treinamento e teste
@@ -266,7 +268,7 @@ class MLP(object):
             self.error_training_avg = self.error_training_avg / self.training_number
   
             # serialização dos pesos desta época (model.dat)
-            u.serialize_model(fold_num, self.weights_0, self.weights_1, self.start_algorithm)
+            u.serialize_model(fold_num, self.weights_0, self.weights_1, self.start_algorithm, self.descriptor)
 
             # teste de 1/5 do fold
             u.print_title_epoch(epoch_current + 1, fold_num,'testing', self.part_2, self.descriptor)        
@@ -304,7 +306,7 @@ class MLP(object):
 
             # condicao de parada por erro
             stop_condition = u.stop_condition(self.errors_list, epoch_current, self.alpha)
-            if stop_condition:
+            if stop_condition['result']:
                 break
 
 
@@ -320,16 +322,7 @@ class MLP(object):
         # desvio padrão
         std_dev = np.std(self.errors_test_avg_list)
 
-        if stop_condition == 1:
-            stop_condition_message = 'erro quadrático médio alcançou o valor mínimo'
-        elif stop_condition == 2:
-            stop_condition_message = 'alpha mínimo alcançado'
-        elif stop_condition == 3:
-            stop_condition_message = 'número máximo de épocas alcançado' 
-        elif stop_condition == 4:
-            stop_condition_message = 'crescimento sucessivo da taxa de erro quadrática média por 4 épocas'
-
-        self.config_f.write("epoca_final: {}\n".format(stop_condition_message))
+        self.config_f.write("epoca_final: {}\n".format(stop_condition['message']))
         self.config_f.write("epoca_final: {}\n".format(epoch_current))
         self.config_f.write("media_total: {}\n".format(mean_total))
         self.config_f.write("desvio_padrao: {}\n".format(std_dev))
