@@ -75,10 +75,14 @@ class MLP(object):
         # utilizada para capturar o tamanho da entrada da camada 0 com os parâmetros escolhidos
         # possibilitando a inicializaccão os pesos
         self.cursor = cursor
-        self.cursor.execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, 'img_test.png'))
-        # image = self.dataset.get('img_test.png').get(self.descriptor)
-        image = np.frombuffer(self.cursor.fetchone()[0])
-        self.l0_neurons = np.size(image)
+        try:
+            self.cursor. execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, 'img_test.png'))
+            row = self.cursor.fetchone()
+            image = np.frombuffer(row[0])
+        except TypeError:
+            print('Erro na obtenção da matriz {} da imagem {} da tabela "treinamento"'.format(self.descriptor, 'img_test.png'))
+            print('Execução encerrada')
+            exit()
 
         # pesos: inicialização
         self.weights_0 = u.nguyen(self.l0_neurons, self.l1_neurons)
@@ -126,12 +130,14 @@ class MLP(object):
         bias_0 = self.bias_0
         bias_1 = self.bias_1
 
-        # image = self.dataset.get(image_name).get(self.descriptor)
-        self.cursor. execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, image_name))
-        # print(self.descriptor) 
-        # print(image_name)
-        image = self.cursor.fetchone()
-        image = np.frombuffer(image)
+        try:
+            self.cursor. execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, image_name))
+            row = self.cursor.fetchone()
+            image = np.frombuffer(row[0])
+        except TypeError:
+            print('Erro na obtenção da matriz {} da imagem {} da tabela "treinamento"'.format(self.descriptor, image_name))
+            print('Execução encerrada')
+            exit()
 
         # camada de entrada: preparação
         mlp_input = np.array(image.reshape(1, np.size(image)))
@@ -183,7 +189,7 @@ class MLP(object):
            str(image_i + 1).zfill(4)))
         np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
         print("\n")
-
+    
 
     def testing(self, image_name, image_i):
         """Método de teste da rede"""
@@ -192,12 +198,14 @@ class MLP(object):
         bias_0 = self.bias_0
         bias_1 = self.bias_1
 
-        # image = self.dataset.get(image_name).get(self.descriptor)
-        self.cursor. execute('SELECT {} FROM testes WHERE image_name = "{}"'.format(self.descriptor, image_name))
-        # print(self.descriptor) 
-        # print(image_name)
-        image = self.cursor.fetchone()
-        image = np.frombuffer(image)
+        try:
+            self.cursor. execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, image_name))
+            row = self.cursor.fetchone()
+            image = np.frombuffer(row[0])
+        except TypeError:
+            print('Erro na obtenção da matriz {} da imagem {} da tabela "treinamento"'.format(self.descriptor, image_name))
+            print('Execução encerrada')
+            exit()
 
         mlp_input = np.array(image.reshape(1, np.size(image)))
         self.l0_neurons = len(mlp_input)
@@ -225,8 +233,7 @@ class MLP(object):
         print("\n")
 
     def confusion_matrix(self, part_2):
-        dataset_test = de_serialize_test(part_2)
-
+        pass
         #todo have fun, Laura!
 
     def run(self, training_data, testing_data, fold_num):
@@ -263,6 +270,12 @@ class MLP(object):
             u.print_title_epoch(epoch_current + 1, fold_num,'testing', self.part_2, self.descriptor)        
             for image_i, image in enumerate(testing_data):
                 self.testing(image, image_i)
+
+            # para a matriz de confusão
+            # dataset_test = u.get_dataset_list(u.get_classes_list('./data/dataset2/testes'), './data/dataset2/testes')
+            # for image_i, image in enumerate(dataset_test):
+            #     self.testing(image, image_i)
+
 
             # erro médio de teste
             self.error_test_avg = self.error_test_avg / self.test_number
