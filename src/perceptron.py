@@ -76,13 +76,15 @@ class MLP(object):
         # possibilitando a inicializaccão os pesos
         self.cursor = cursor
         try:
-            self.cursor. execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, 'img_test.png'))
+            self.cursor.execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, 'img_test.png'))
             row = self.cursor.fetchone()
             image = np.frombuffer(row[0])
         except TypeError:
             print('Erro na obtenção da matriz {} da imagem {} da tabela "treinamento"'.format(self.descriptor, 'img_test.png'))
             print('Execução encerrada')
             exit()
+
+        self.l0_neurons = np.size(image)
 
         # pesos: inicialização
         self.weights_0 = u.nguyen(self.l0_neurons, self.l1_neurons)
