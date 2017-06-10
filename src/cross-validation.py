@@ -48,7 +48,8 @@ def k_fold(dataset, classes_num, parameters, start_algorithm):
         # se precisar mudar, possivelmente vamos ter que instanciar a rede antes de chamar o k_fold e passar os parâmetros
         # de inicialização através de um getter. decidam-se e me falem. 
         # mlp.confusion_matrix(parameters['part_2'])
-        conn.close()
+    
+    conn.close()
 
 # início da execução
 if __name__ == "__main__":
@@ -59,4 +60,6 @@ if __name__ == "__main__":
     u.create_directories(['data', 'src', 'output'])
     dataset = u.get_dataset_list(u.get_classes_list(parameters['workpath']), parameters['workpath'])
     k_fold(dataset, len(dataset), parameters, start_algorithm)
-    print ("Total time running: \t\t\t\t\t\t{}\n".format(datetime.now() - start_algorithm))
+    print("Main Start Time:   \t\t\t\t\t\t\t{}".format(start_algorithm.strftime("%Y-%m-%d %H:%M:%S")))
+    print("Main End Time:      \t\t\t\t\t\t{}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    print("Total time running: \t\t\t\t\t{}\n".format(datetime.now() - start_algorithm))
