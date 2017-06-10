@@ -49,7 +49,7 @@ def run():
     for line in dataset:
         print('Training Letters: {}'.format(u.get_letter(line[0], True)))
         widgets = [progressbar.Percentage(), ' (', progressbar.Counter(), ' of ',  str(len(line)), ') ',  
-        progressbar.Bar('█'), progressbar.Timer(), ' | ',progressbar.ETA()]
+        progressbar.Bar('█'),  '  ',progressbar.ETA()]
         with progressbar.ProgressBar(widgets=widgets, max_value=len(line)) as bar:
             for i, name in enumerate(line):
                 values = {}
@@ -73,8 +73,9 @@ def run():
     dataset = u.get_dataset_list(u.get_classes_list('./data/dataset2/testes'), './data/dataset2/testes')
 
     for line in dataset:
+        print('Testing Letters: {}'.format(u.get_letter(line[0], True)))
         widgets = [progressbar.Percentage(), ' (', progressbar.Counter(), ' of ',  str(len(line)), ') ',  
-        progressbar.Bar('█'), progressbar.Timer(), ' | ',progressbar.ETA()]
+        progressbar.Bar('█'), '  ',progressbar.ETA()]
         with progressbar.ProgressBar(widgets=widgets, max_value=len(line)) as bar:
             for i, name in enumerate(line):
                 values = {}
@@ -95,10 +96,10 @@ def run():
         conn.commit()
     c.close()
     end = datetime.now()
-    print('\nTotal of images described: {} + test image.\n'.format(str(count - 1).zfill(5)))
-    print('Database in {}\n'.format(path))
-    print("Start Time: {}\n".format(start.strftime("%d/%m/%Y %H:%M:%S")))
-    print("End Time: {}\n".format(end.strftime("%d/%m/%Y %H:%M:%S")))
+    print('\nTotal of images described: {} + test image.'.format(str(count - 1).zfill(5)))
+    print('Database in {}'.format(path))
+    print("Start Time: {}".format(start.strftime("%d/%m/%Y %H:%M:%S")))
+    print("End Time: {}".format(end.strftime("%d/%m/%Y %H:%M:%S")))
     print('Total Elapsed Time: {}\n'.format(end - start))
 
 if __name__ == "__main__":
