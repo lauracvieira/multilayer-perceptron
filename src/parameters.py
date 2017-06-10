@@ -40,6 +40,8 @@ def get_parameters(descriptor, part_2):
     p['descriptor_param_2'] = __HOG_PIXELS_PER_CELL if descriptor == 'HOG' else __LBP_RADIUS
     p['descriptor_param_3'] = __HOG_CELLS_PER_BLOCK if descriptor == 'HOG' else 0
     p['workpath'] = './data/dataset{}/treinamento/'.format(2 if part_2 else 1)
+    p['testpath'] = './data/dataset{}/testes/'.format(2 if part_2 else 1)
+
 
     return p
 

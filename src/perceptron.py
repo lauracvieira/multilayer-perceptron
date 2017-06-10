@@ -8,12 +8,13 @@ import numpy as np
 import random
 import pandas as pd
 import parameters as p
+import sqlite3
 import sys
 import time
 
 class MLP(object):
     """Classe que representa a estrutura do multilayer perceptron"""
-    def __init__(self, classes_num, parameters, dataset, start_algorithm):
+    def __init__(self, classes_num, parameters, cursor, start_algorithm):
         # 2ª entrega
         self.part_2 = parameters['part_2']
 
@@ -73,8 +74,10 @@ class MLP(object):
         # abertura do dataset serializado e leitura da matriz de descrição da imagem de teste 
         # utilizada para capturar o tamanho da entrada da camada 0 com os parâmetros escolhidos
         # possibilitando a inicializaccão os pesos
-        self.dataset = dataset
-        image = self.dataset.get('img_test.png').get(self.descriptor)
+        self.cursor = cursor
+        self.cursor.execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, 'img_test.png'))
+        # image = self.dataset.get('img_test.png').get(self.descriptor)
+        image = np.frombuffer(self.cursor.fetchone()[0])
         self.l0_neurons = np.size(image)
 
         # pesos: inicialização
@@ -123,7 +126,12 @@ class MLP(object):
         bias_0 = self.bias_0
         bias_1 = self.bias_1
 
-        image = self.dataset.get(image_name).get(self.descriptor)
+        # image = self.dataset.get(image_name).get(self.descriptor)
+        self.cursor. execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, image_name))
+        # print(self.descriptor) 
+        # print(image_name)
+        image = self.cursor.fetchone()
+        image = np.frombuffer(image)
 
         # camada de entrada: preparação
         mlp_input = np.array(image.reshape(1, np.size(image)))
@@ -184,7 +192,12 @@ class MLP(object):
         bias_0 = self.bias_0
         bias_1 = self.bias_1
 
-        image = self.dataset.get(image_name).get(self.descriptor)
+        # image = self.dataset.get(image_name).get(self.descriptor)
+        self.cursor. execute('SELECT {} FROM testes WHERE image_name = "{}"'.format(self.descriptor, image_name))
+        # print(self.descriptor) 
+        # print(image_name)
+        image = self.cursor.fetchone()
+        image = np.frombuffer(image)
 
         mlp_input = np.array(image.reshape(1, np.size(image)))
         self.l0_neurons = len(mlp_input)

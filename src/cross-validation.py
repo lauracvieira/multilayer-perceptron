@@ -5,6 +5,7 @@ from datetime import datetime
 import utils as u
 import parameters as p
 import perceptron
+import sqlite3
 import sys
 
 def get_descriptor():
@@ -27,7 +28,10 @@ def k_fold(dataset, classes_num, parameters, start_algorithm):
     num_folds = 5
     subset_size = int(len(dataset[0]) / num_folds)
 
-    dataset_described = u.de_serialize_dataset(parameters['part_2'])    
+    # dataset_described = u.de_serialize_dataset(parameters['part_2']) 
+
+    conn = sqlite3.connect('./data/database.db')
+    cursor = conn.cursor()   
 
     for fold_i in range(num_folds): 
         testing_this_round = list()
@@ -38,12 +42,13 @@ def k_fold(dataset, classes_num, parameters, start_algorithm):
             training_this_round += dataset[dataset_j][:fold_i * subset_size] + \
                 dataset[dataset_j][(fold_i + 1) * subset_size:]
 
-        mlp = perceptron.MLP(classes_num, parameters, dataset_described, start_algorithm)
+        mlp = perceptron.MLP(classes_num, parameters, cursor, start_algorithm)
         mlp.run(training_this_round, testing_this_round, fold_i)
         # acho que a chamada desse método não vai aqui, mas é aqui que a MLP está instanciada, então deixei aqui.
         # se precisar mudar, possivelmente vamos ter que instanciar a rede antes de chamar o k_fold e passar os parâmetros
         # de inicialização através de um getter. decidam-se e me falem. 
         # mlp.confusion_matrix(parameters['part_2'])
+        conn.close()
 
 # início da execução
 if __name__ == "__main__":
