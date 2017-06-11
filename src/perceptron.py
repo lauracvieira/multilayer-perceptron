@@ -11,6 +11,8 @@ import parameters as p
 import sqlite3
 import sys
 import time
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 class MLP(object):
     """Classe que representa a estrutura do multilayer perceptron"""
@@ -50,9 +52,12 @@ class MLP(object):
         self.weights_0_previous = None
         self.weights_1_previous = None
 
-        # lista de erros para a condicao de parada
-        self.errors_list = list()
+        # lista de erros de teste
+        self.errors_test_list = list()
         self.errors_test_avg_list = list()
+
+        #lista de erros de treinamento
+        self.errors_training_list = list()
 
         # descritor
         self.descriptor = parameters['descriptor']
@@ -124,6 +129,16 @@ class MLP(object):
         self.config_f.write("rede_max_epocas: {}\n".format(self.epochs))
         self.config_f.write("rede_tecnica_ajuste_alpha: alpha - 0.001 para alpha maior que 0\n")
         
+    def plot_graph(self, fold_num):
+        ax = plt.figure().gca()
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        plt.plot(self.errors_test_list)
+        plt.plot(self.errors_training_list)
+        plt.ylabel('Error')
+        plt.xlabel('Epochs')
+        plt.savefig("output/error_graph_{}_{}_{}.jpg".format(fold_num, 
+            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
+        plt.close()
 
     def training(self, image_name, image_i, epoch, fold_num):
         """Método de treinamento da rede"""
@@ -241,10 +256,6 @@ class MLP(object):
         np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
         print("\n")
 
-    def confusion_matrix(self):
-        pass
-        #todo have fun, Laura!
-
     def run(self, training_data, testing_data, fold_num):
         """Método principal de execução do multilayer perceptron"""
         fold_num = fold_num + 1
@@ -288,9 +299,13 @@ class MLP(object):
             # salva o erro quadratico médio desta época
             self.errors_test_avg_list.append(self.error_test_avg)
 
-            # atualização da lista de erros
-            u.error_list_update(self.error_test_avg, self.errors_list)
+            # atualização da lista de erros de teste
+            self.errors_test_list.append(self.error_test_avg)
+            #u.error_list_update(self.error_test_avg, self.errors_list)
             
+            # atualizacao da lista de erros de treinamento
+            self.errors_training_list.append(self.error_training_avg)
+
             # gravação dos erros quadráticos médios
             self.error_f.write("{};{};{}\n".format(epoch_current, self.error_training_avg,
              self.error_test_avg))
@@ -306,7 +321,7 @@ class MLP(object):
                 self.alpha = self.alpha - 0.001
 
             # condicao de parada por erro
-            stop_condition = u.stop_condition(self.errors_list, epoch_current, self.alpha)
+            stop_condition = u.stop_condition(self.errors_test_list, epoch_current, self.alpha)
             if stop_condition['result']:
                 break
 
@@ -348,4 +363,4 @@ class MLP(object):
         self.config_f.close()
         self.error_f.close()
 
-        #self.plot_graph()
+        self.plot_graph(fold_num)
