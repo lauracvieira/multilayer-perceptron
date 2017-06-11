@@ -54,8 +54,6 @@ class MLP(object):
         self.errors_list = list()
         self.errors_test_avg_list = list()
 
-        # lista de error para plotar grafico
-
         # descritor
         self.descriptor = parameters['descriptor']
 
@@ -190,10 +188,10 @@ class MLP(object):
         self.bias_0 = bias_0
         self.bias_1 = bias_1
 
-        #print('Fold: {}\tEpoch: {}\tTraining: {}'.format(fold_num, str(epoch).zfill(4),
-        #   str(image_i + 1).zfill(4)))
-        #np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
-        #print("\n")
+        print('Fold: {}\tEpoch: {}\tTraining: {}'.format(fold_num, str(epoch).zfill(4),
+           str(image_i + 1).zfill(4)))
+        np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
+        print("\n")
     
 
     def testing(self, image_name, image_i, dataset_tests = False):
@@ -220,7 +218,7 @@ class MLP(object):
         self.l0_neurons = len(mlp_input)
         expected_output = np.array(u.get_output(image_name, self.part_2))
 
-        #print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4), u.get_letter(image_name, self.part_2)))
+        print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4), u.get_letter(image_name, self.part_2)))
         layer_0 = mlp_input
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
@@ -240,8 +238,8 @@ class MLP(object):
         self.error_test_avg = self.error_test_avg + avg_y_error
         self.test_number = self.test_number + 1
 
-        #np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
-        #print("\n")
+        np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
+        print("\n")
 
     def confusion_matrix(self):
         pass
