@@ -5,6 +5,7 @@ import numpy as np
 import pickle
 import os
 import parameters as p
+import matplotlib.pyplot as plt
 
 def create_directories(directories):
     """Criação dos diretórios"""
@@ -222,7 +223,7 @@ def get_resulting_letter(layer_2, part_2):
             greatest_output = layer_2[row][0]
             greatest_row = row
 
-    if greatest_output > 0.7:
+    if greatest_output > 0.1:
         return get_letter_from_num(greatest_row, part_2)
     else:
         return None

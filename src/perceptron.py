@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from sklearn.metrics import accuracy_score
+from matplotlib.ticker import MaxNLocator
+import matplotlib.pyplot as plt
 from datetime import datetime
 import utils as u
 import imagelib
@@ -11,8 +14,9 @@ import parameters as p
 import sqlite3
 import sys
 import time
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+from sklearn.metrics import classification_report
+from sklearn.metrics import precision_recall_fscore_support
+
 
 class MLP(object):
     """Classe que representa a estrutura do multilayer perceptron"""
@@ -27,6 +31,10 @@ class MLP(object):
         
         # diretório
         self.path = parameters['workpath']
+
+        # quantidade de imagens correspondentes a cada letra na pasta 'testes'
+        # sera utilizada para calculo da acuracia (acertos/total)
+        self.num_tests_images_per_letter = None
         
         # bias
         self.bias_0 = 1
@@ -47,7 +55,6 @@ class MLP(object):
         self.config_f = None
         self.error_f = None
 
-        #self.
         # pesos anteriores
         self.weights_0_previous = None
         self.weights_1_previous = None
@@ -208,7 +215,6 @@ class MLP(object):
         np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
         print("\n")
     
-
     def testing(self, image_name, image_i, dataset_tests = False):
         """Método de teste da rede"""
         mlp_input = None
@@ -233,7 +239,7 @@ class MLP(object):
         self.l0_neurons = len(mlp_input)
         expected_output = np.array(u.get_output(image_name, self.part_2))
 
-        print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4), u.get_letter(image_name, self.part_2)))
+        #print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4), u.get_letter(image_name, self.part_2)))
         layer_0 = mlp_input
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
@@ -255,6 +261,34 @@ class MLP(object):
 
         np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
         print("\n")
+
+    def get_confusion_matrix_and_accuracy(self):
+        # obtencao das imagens da pasta testes daquele dataset para validacao
+        # funcao teste chamada para cada imagem, para adicionar os acertos na matriz de confusao posteriormente
+        parameters_test = p.get_parameters(self.descriptor, self.part_2)
+        dataset_validation = u.get_dataset_list(u.get_classes_list(parameters_test['testpath']), parameters_test['testpath'])
+        for dataset in dataset_validation:
+            self.num_tests_images_per_letter = len(dataset)
+            for image_i, image in enumerate(dataset):
+                self.testing(image, image_i, dataset_tests = True)
+
+        # matriz de confusão
+        obtained = pd.Series(self.test_results, name='Esperado')
+        predicted = pd.Series(self.test_predicted, name='   Obtido')
+        confusion_matrix = pd.crosstab(obtained, predicted)
+        print(confusion_matrix)
+        
+        # acuracia
+        accuracy = accuracy_score(obtained, predicted)
+        print("\nAcurácia média: {} \n".format(accuracy))
+
+        # acuracia por letra 
+        # calculada dividindo acertos (diagonal da matriz de confusao) pelo total de imagens que foram testadas daquela letra
+        letters = u.get_classes_letters_list(self.part_2)
+        for letter_i, letter in enumerate(letters):
+            positive = confusion_matrix[letter][letter]
+            total = self.num_tests_images_per_letter
+            print("Acurácia da classe {} :".format(letter), positive/total)
 
     def run(self, training_data, testing_data, fold_num):
         """Método principal de execução do multilayer perceptron"""
@@ -325,20 +359,8 @@ class MLP(object):
             if stop_condition['result']:
                 break
 
-        #obtencao das imagens da pasta testes daquele dataset para validacao
-        #funcao teste chamada para cada imagem, para adicionar os acertos na matriz de confusao posteriormente
-        parameters_test = p.get_parameters(self.descriptor, self.part_2)
-        dataset_validation = u.get_dataset_list(u.get_classes_list(parameters_test['testpath']), parameters_test['testpath'])
-        for dataset in dataset_validation:
-            for image_i, image in enumerate(dataset):
-                self.testing(image, image_i, dataset_tests = True)
+        self.get_confusion_matrix_and_accuracy()
 
-        # matriz de confusão
-        obtained = pd.Series(self.test_results, name='Esperado')
-        predicted = pd.Series(self.test_predicted, name='   Obtido')
-        confusion_matrix = pd.crosstab(obtained, predicted)
-        print(confusion_matrix)
-        
         # média total
         mean_total = np.mean(self.errors_test_avg_list)
 
