@@ -142,18 +142,6 @@ def nguyen(inputs, outputs):
     return neww.T
 
 
-def error_list_update(error, error_list):
-    """Atualiza a lista de erros de forma circular para que ela contenha os erros das últimas 5 épocas"""
-    if len(error_list) == 4:
-        # remove o erro mais antigo da lista
-        del error_list[0]
-
-    # adiciona o erro da última época na última posição
-    error_list.append(error)
-
-    return error_list
-
-
 def stop_condition(error_list, epoch_current, alpha):
     """Aciona parada quando o erro for menor que o erro mínimo
         ou se o erro for crescente por 4 épocas consecutivas E tiver executado o número
@@ -178,7 +166,8 @@ def stop_condition(error_list, epoch_current, alpha):
         condition['message'] = 'número máximo de épocas alcançado' 
         return condition
 
-    if (error_list[3] > error_list[2] > error_list[1] > error_list[0]) and \
+    #if (error_list[3] > error_list[2] > error_list[1] > error_list[0]) and \
+    if (error_list[-1] > error_list[-2] > error_list[-3] > error_list[-4]) and \
      (epoch_current > p.get_epochs_min()):
         condition['result'] = 4
         condition['message'] = 'crescimento sucessivo da taxa de erro quadrática média por 4 épocas'

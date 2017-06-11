@@ -11,6 +11,8 @@ import parameters as p
 import sqlite3
 import sys
 import time
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 class MLP(object):
     """Classe que representa a estrutura do multilayer perceptron"""
@@ -45,13 +47,17 @@ class MLP(object):
         self.config_f = None
         self.error_f = None
 
+        #self.
         # pesos anteriores
         self.weights_0_previous = None
         self.weights_1_previous = None
 
-        # erros
-        self.errors_list = list()
+        # lista de erros de teste
+        self.errors_test_list = list()
         self.errors_test_avg_list = list()
+
+        #lista de erros de treinamento
+        self.errors_training_list = list()
 
         # descritor
         self.descriptor = parameters['descriptor']
@@ -123,6 +129,16 @@ class MLP(object):
         self.config_f.write("rede_max_epocas: {}\n".format(self.epochs))
         self.config_f.write("rede_tecnica_ajuste_alpha: alpha - 0.001 para alpha maior que 0\n")
         
+    def plot_graph(self, fold_num):
+        ax = plt.figure().gca()
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        plt.plot(self.errors_test_list)
+        plt.plot(self.errors_training_list)
+        plt.ylabel('Error')
+        plt.xlabel('Epochs')
+        plt.savefig("output/error_graph_{}_{}_{}.jpg".format(fold_num, 
+            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
+        plt.close()
 
     def training(self, image_name, image_i, epoch, fold_num):
         """Método de treinamento da rede"""
@@ -193,19 +209,23 @@ class MLP(object):
         print("\n")
     
 
-    def testing(self, image_name, image_i):
+    def testing(self, image_name, image_i, dataset_tests = False):
         """Método de teste da rede"""
         mlp_input = None
         image = None
         bias_0 = self.bias_0
         bias_1 = self.bias_1
 
+        table = 'treinamento'
+        if dataset_tests == True:
+            table = 'testes'
+
         try:
-            self.cursor. execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, image_name))
+            self.cursor. execute('SELECT {} FROM {} WHERE image_name = "{}"'.format(self.descriptor, table, image_name))
             row = self.cursor.fetchone()
             image = np.frombuffer(row[0])
         except TypeError:
-            print('Erro na obtenção da matriz {} da imagem {} da tabela "treinamento"'.format(self.descriptor, image_name))
+            print('Erro na obtenção da matriz {} da imagem {} da tabela "testes"'.format(self.descriptor, image_name))
             print('Execução encerrada')
             exit()
 
@@ -213,15 +233,17 @@ class MLP(object):
         self.l0_neurons = len(mlp_input)
         expected_output = np.array(u.get_output(image_name, self.part_2))
 
-        #print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4), u.get_letter(image_name, self.part_2)))
+        print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4), u.get_letter(image_name, self.part_2)))
         layer_0 = mlp_input
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
 
-        resulting_letter = u.get_resulting_letter(layer_2, self.part_2)
-        if resulting_letter != None:
-            self.test_predicted.append(u.get_letter(image_name, self.part_2))
-            self.test_results.append(resulting_letter)
+        #se o teste estiver sendo rodado para o dataset de testes, armazena os acertos e erros para a matriz de confusao
+        if dataset_tests == True:
+            resulting_letter = u.get_resulting_letter(layer_2, self.part_2)
+            if resulting_letter != None:
+                self.test_predicted.append(u.get_letter(image_name, self.part_2))
+                self.test_results.append(resulting_letter)
 
         # erros: segunda camada
         y_error = (expected_output - layer_2)
@@ -233,10 +255,6 @@ class MLP(object):
 
         np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
         print("\n")
-
-    def confusion_matrix(self, part_2):
-        pass
-        #todo have fun, Laura!
 
     def run(self, training_data, testing_data, fold_num):
         """Método principal de execução do multilayer perceptron"""
@@ -275,21 +293,19 @@ class MLP(object):
             for image_i, image in enumerate(testing_data):
                 self.testing(image, image_i)
 
-            # para a matriz de confusão
-            # dataset_test = u.get_dataset_list(u.get_classes_list('./data/dataset2/testes'), './data/dataset2/testes')
-            # for image_i, image in enumerate(dataset_test):
-            #     self.testing(image, image_i)
-
-
             # erro médio de teste
             self.error_test_avg = self.error_test_avg / self.test_number
 
             # salva o erro quadratico médio desta época
             self.errors_test_avg_list.append(self.error_test_avg)
 
-            # atualização da lista de erros
-            u.error_list_update(self.error_test_avg, self.errors_list)
+            # atualização da lista de erros de teste
+            self.errors_test_list.append(self.error_test_avg)
+            #u.error_list_update(self.error_test_avg, self.errors_list)
             
+            # atualizacao da lista de erros de treinamento
+            self.errors_training_list.append(self.error_training_avg)
+
             # gravação dos erros quadráticos médios
             self.error_f.write("{};{};{}\n".format(epoch_current, self.error_training_avg,
              self.error_test_avg))
@@ -305,10 +321,17 @@ class MLP(object):
                 self.alpha = self.alpha - 0.001
 
             # condicao de parada por erro
-            stop_condition = u.stop_condition(self.errors_list, epoch_current, self.alpha)
+            stop_condition = u.stop_condition(self.errors_test_list, epoch_current, self.alpha)
             if stop_condition['result']:
                 break
 
+        #obtencao das imagens da pasta testes daquele dataset para validacao
+        #funcao teste chamada para cada imagem, para adicionar os acertos na matriz de confusao posteriormente
+        parameters_test = p.get_parameters(self.descriptor, self.part_2)
+        dataset_validation = u.get_dataset_list(u.get_classes_list(parameters_test['testpath']), parameters_test['testpath'])
+        for dataset in dataset_validation:
+            for image_i, image in enumerate(dataset):
+                self.testing(image, image_i, dataset_tests = True)
 
         # matriz de confusão
         obtained = pd.Series(self.test_results, name='Esperado')
@@ -339,3 +362,5 @@ class MLP(object):
         
         self.config_f.close()
         self.error_f.close()
+
+        self.plot_graph(fold_num)
