@@ -45,13 +45,16 @@ class MLP(object):
         self.config_f = None
         self.error_f = None
 
+        #self.
         # pesos anteriores
         self.weights_0_previous = None
         self.weights_1_previous = None
 
-        # erros
+        # lista de erros para a condicao de parada
         self.errors_list = list()
         self.errors_test_avg_list = list()
+
+        # lista de error para plotar grafico
 
         # descritor
         self.descriptor = parameters['descriptor']
@@ -187,25 +190,29 @@ class MLP(object):
         self.bias_0 = bias_0
         self.bias_1 = bias_1
 
-        print('Fold: {}\tEpoch: {}\tTraining: {}'.format(fold_num, str(epoch).zfill(4),
-           str(image_i + 1).zfill(4)))
-        np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
-        print("\n")
+        #print('Fold: {}\tEpoch: {}\tTraining: {}'.format(fold_num, str(epoch).zfill(4),
+        #   str(image_i + 1).zfill(4)))
+        #np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
+        #print("\n")
     
 
-    def testing(self, image_name, image_i):
+    def testing(self, image_name, image_i, dataset_tests = False):
         """Método de teste da rede"""
         mlp_input = None
         image = None
         bias_0 = self.bias_0
         bias_1 = self.bias_1
 
+        table = 'treinamento'
+        if dataset_tests == True:
+            table = 'testes'
+
         try:
-            self.cursor. execute('SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor, image_name))
+            self.cursor. execute('SELECT {} FROM {} WHERE image_name = "{}"'.format(self.descriptor, table, image_name))
             row = self.cursor.fetchone()
             image = np.frombuffer(row[0])
         except TypeError:
-            print('Erro na obtenção da matriz {} da imagem {} da tabela "treinamento"'.format(self.descriptor, image_name))
+            print('Erro na obtenção da matriz {} da imagem {} da tabela "testes"'.format(self.descriptor, image_name))
             print('Execução encerrada')
             exit()
 
@@ -218,10 +225,12 @@ class MLP(object):
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
 
-        resulting_letter = u.get_resulting_letter(layer_2, self.part_2)
-        if resulting_letter != None:
-            self.test_predicted.append(u.get_letter(image_name, self.part_2))
-            self.test_results.append(resulting_letter)
+        #se o teste estiver sendo rodado para o dataset de testes, armazena os acertos e erros para a matriz de confusao
+        if dataset_tests == True:
+            resulting_letter = u.get_resulting_letter(layer_2, self.part_2)
+            if resulting_letter != None:
+                self.test_predicted.append(u.get_letter(image_name, self.part_2))
+                self.test_results.append(resulting_letter)
 
         # erros: segunda camada
         y_error = (expected_output - layer_2)
@@ -231,10 +240,10 @@ class MLP(object):
         self.error_test_avg = self.error_test_avg + avg_y_error
         self.test_number = self.test_number + 1
 
-        np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
-        print("\n")
+        #np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
+        #print("\n")
 
-    def confusion_matrix(self, part_2):
+    def confusion_matrix(self):
         pass
         #todo have fun, Laura!
 
@@ -275,12 +284,6 @@ class MLP(object):
             for image_i, image in enumerate(testing_data):
                 self.testing(image, image_i)
 
-            # para a matriz de confusão
-            # dataset_test = u.get_dataset_list(u.get_classes_list('./data/dataset2/testes'), './data/dataset2/testes')
-            # for image_i, image in enumerate(dataset_test):
-            #     self.testing(image, image_i)
-
-
             # erro médio de teste
             self.error_test_avg = self.error_test_avg / self.test_number
 
@@ -309,6 +312,13 @@ class MLP(object):
             if stop_condition['result']:
                 break
 
+        #obtencao das imagens da pasta testes daquele dataset para validacao
+        #funcao teste chamada para cada imagem, para adicionar os acertos na matriz de confusao posteriormente
+        parameters_test = p.get_parameters(self.descriptor, self.part_2)
+        dataset_validation = u.get_dataset_list(u.get_classes_list(parameters_test['testpath']), parameters_test['testpath'])
+        for dataset in dataset_validation:
+            for image_i, image in enumerate(dataset):
+                self.testing(image, image_i, dataset_tests = True)
 
         # matriz de confusão
         obtained = pd.Series(self.test_results, name='Esperado')
@@ -339,3 +349,5 @@ class MLP(object):
         
         self.config_f.close()
         self.error_f.close()
+
+        #self.plot_graph()
