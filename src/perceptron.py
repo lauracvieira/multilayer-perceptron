@@ -14,9 +14,7 @@ import parameters as p
 import sqlite3
 import sys
 import time
-from sklearn.metrics import classification_report
-from sklearn.metrics import precision_recall_fscore_support
-
+import seaborn as sn
 
 class MLP(object):
     """Classe que representa a estrutura do multilayer perceptron"""
@@ -239,7 +237,7 @@ class MLP(object):
         self.l0_neurons = len(mlp_input)
         expected_output = np.array(u.get_output(image_name, self.part_2))
 
-        #print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4), u.get_letter(image_name, self.part_2)))
+        print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4), u.get_letter(image_name, self.part_2)))
         layer_0 = mlp_input
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
@@ -262,7 +260,9 @@ class MLP(object):
         np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
         print("\n")
 
-    def get_confusion_matrix_and_accuracy(self):
+    def get_confusion_matrix_and_accuracy(self, fold_num):
+        letters = u.get_classes_letters_list(self.part_2)
+
         # obtencao das imagens da pasta testes daquele dataset para validacao
         # funcao teste chamada para cada imagem, para adicionar os acertos na matriz de confusao posteriormente
         parameters_test = p.get_parameters(self.descriptor, self.part_2)
@@ -276,15 +276,24 @@ class MLP(object):
         obtained = pd.Series(self.test_results, name='Esperado')
         predicted = pd.Series(self.test_predicted, name='   Obtido')
         confusion_matrix = pd.crosstab(obtained, predicted)
-        print(confusion_matrix)
-        
+
+        # plotar matriz de confusão com o uso da biblioteca seaborn
+        df_cm = pd.DataFrame(confusion_matrix, index = [i for i in letters],
+                  columns = [i for i in letters])
+        plt.figure(figsize = (10,7))
+        sn.heatmap(df_cm, annot=True, cmap='PuBu', fmt='g')
+        plt.ylabel('Esperado')
+        plt.xlabel('Obtido')
+        plt.savefig("output/confusion_matriz_{}_{}_{}.jpg".format(fold_num, 
+            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
+        plt.close()
+
         # acuracia
         accuracy = accuracy_score(obtained, predicted)
         print("\nAcurácia média: {} \n".format(accuracy))
 
         # acuracia por letra 
         # calculada dividindo acertos (diagonal da matriz de confusao) pelo total de imagens que foram testadas daquela letra
-        letters = u.get_classes_letters_list(self.part_2)
         for letter_i, letter in enumerate(letters):
             positive = confusion_matrix[letter][letter]
             total = self.num_tests_images_per_letter
@@ -359,7 +368,7 @@ class MLP(object):
             if stop_condition['result']:
                 break
 
-        self.get_confusion_matrix_and_accuracy()
+        self.get_confusion_matrix_and_accuracy(fold_num)
 
         # média total
         mean_total = np.mean(self.errors_test_avg_list)
