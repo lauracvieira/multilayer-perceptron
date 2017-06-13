@@ -42,40 +42,40 @@ def get_classes_dict(part_2):
     """Retorna um dicionário contendo as letras das classes
         correspondentes ao nome físico dos arquivos"""
     if part_2:
-        classes = { 
-                    'train_41': 'A', 
-                    'train_42': 'B',
-                    'train_43': 'C', 
-                    'train_44': 'D', 
-                    'train_45': 'E', 
-                    'train_46': 'F', 
-                    'train_47': 'G', 
-                    'train_48': 'H', 
-                    'train_49': 'I', 
-                    'train_4a': 'J', 
-                    'train_4b': 'K', 
-                    'train_4c': 'L', 
-                    'train_4d': 'M', 
-                    'train_4e': 'N',
-                    'train_4f': 'O', 
-                    'train_50': 'P', 
-                    'train_51': 'Q', 
-                    'train_52': 'R', 
-                    'train_53': 'S', 
-                    'train_54': 'T', 
-                    'train_55': 'U', 
-                    'train_56': 'V', 
-                    'train_57': 'W', 
-                    'train_58': 'X',
-                    'train_59': 'Y', 
-                    'train_5a': 'Z'
-                    }
+        classes = {
+            'train_41': 'A',
+            'train_42': 'B',
+            'train_43': 'C',
+            'train_44': 'D',
+            'train_45': 'E',
+            'train_46': 'F',
+            'train_47': 'G',
+            'train_48': 'H',
+            'train_49': 'I',
+            'train_4a': 'J',
+            'train_4b': 'K',
+            'train_4c': 'L',
+            'train_4d': 'M',
+            'train_4e': 'N',
+            'train_4f': 'O',
+            'train_50': 'P',
+            'train_51': 'Q',
+            'train_52': 'R',
+            'train_53': 'S',
+            'train_54': 'T',
+            'train_55': 'U',
+            'train_56': 'V',
+            'train_57': 'W',
+            'train_58': 'X',
+            'train_59': 'Y',
+            'train_5a': 'Z'
+        }
     else:
-        classes = { 
-                    'train_53': 'S', 
-                    'train_58': 'X',
-                    'train_5a': 'Z'
-                    }
+        classes = {
+            'train_53': 'S',
+            'train_58': 'X',
+            'train_5a': 'Z'
+        }
     return classes
 
 
@@ -87,7 +87,7 @@ def get_classes_letters_list(part_2):
 def get_letter(image_name, part_2):
     """Retorna a letra relacionada à classe do arquivo"""
     return get_classes_dict(part_2)[image_name[:8]]
-    
+
 
 def get_output(image_name, part_2):
     """Retorna um dicionário contendo a configuração de saída esperada"""
@@ -105,15 +105,16 @@ def get_output(image_name, part_2):
 
     valor = letras[letra]
     linha = output_matrix[valor]
-    
+
     return linha.T
 
 
 def serialize_model(fold_num, weight_0, weight_1, start_algorithm, descriptor):
     """Serialiização dos pesos no arquivo output/model.dat"""
     data = (weight_0, weight_1)
-    f = open('./output/model_{}_{}_{}.dat'.format(fold_num, 
-        start_algorithm.strftime("%d%m%Y-%H%M"), descriptor), "wb")
+    f = open(
+        '/output/model_{}_{}_{}.dat'.format(fold_num,
+start_algorithm.strftime("%d%m%Y-%H%M"), descriptor), "wb")
     pickle.dump(data, f)
     f.close()
 
@@ -131,7 +132,7 @@ def initnw(inputs, outputs):
         w_rand *= np.sqrt(1. / np.square(w_rand).sum(axis=1).reshape(cn, 1))
 
     w = w_fix * w_rand
-    
+
     return w
 
 
@@ -139,7 +140,7 @@ def nguyen(inputs, outputs):
     """Retorno transposto dos pesos do Nguyen-Widrow"""
     neww = []
     neww = initnw(inputs, outputs)
-    
+
     return neww.T
 
 
@@ -147,7 +148,7 @@ def stop_condition(error_list, epoch_current, alpha):
     """Aciona parada quando o erro for menor que o erro mínimo
         ou se o erro for crescente por 4 épocas consecutivas E tiver executado o número
         mínimo de épocas estipulado nos parâmetros"""
-    condition = {'result' : 0}
+    condition = {'result': 0}
 
     if len(error_list) < 4:
         return condition
@@ -164,10 +165,9 @@ def stop_condition(error_list, epoch_current, alpha):
 
     if epoch_current == p.get_epochs_max():
         condition['result'] = 3
-        condition['message'] = 'número máximo de épocas alcançado' 
+        condition['message'] = 'número máximo de épocas alcançado'
         return condition
 
-    #if (error_list[3] > error_list[2] > error_list[1] > error_list[0]) and \
     if (error_list[-1] > error_list[-2] > error_list[-3] > error_list[-4]) and \
      (epoch_current > p.get_epochs_min()):
         condition['result'] = 4
@@ -184,25 +184,26 @@ def print_title_epoch(epoch, fold_num, message, part_2, descriptor, print_epoch=
     else:
         print()
     if print_epoch:
-        print(str.center('FOLD {} - EPOCH {} - {} - {} DELIVERY'.format(fold_num, str(epoch).zfill(4), 
-            message.upper(), 'SECOND' if part_2 else 'FIRST'), 100))
+        print(str.center('FOLD {} - EPOCH {} - {} - {} DELIVERY'.format(fold_num,
+            str(epoch).zfill(4), message.upper(), 'SECOND' if part_2 else 'FIRST'), 100))
     else:
         print(str.center('{} - {} DELIVERY'.format(message.upper(),
          'SECOND' if part_2 else 'FIRST'), 100))
 
     print(str.center('DESCRIPTOR: ' + descriptor, 100))
-    
+
     message_2 = 'LETTERS: '
 
     for c in get_classes_letters_list(part_2):
         message_2 += c + ' '
-    
+
     print(str.center(message_2, 100))
 
     for i in range(100):
         print('-', end='')
     else:
         print('\n')
+
 
 def get_letter_from_num(letter_num, part_2):
     """Retorna a letra a partir do número"""
@@ -213,8 +214,10 @@ def get_letter_from_num(letter_num, part_2):
 
     return letters[letter_num]
 
+
 def get_resulting_letter(layer_2, part_2):
-    """A partir dos resultados da ultima camada do perceptron, retorna a letra obtida no teste"""
+    """A partir dos resultados da ultima camada do perceptron,
+    retorna a letra obtida no teste"""
     greatest_output = 0
     greatest_row = 0
 
