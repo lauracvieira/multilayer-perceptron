@@ -159,8 +159,8 @@ class MLP(object):
                 self.testing(image, image_i, dataset_tests=True)
 
         # matriz de confusão
-        obtained = pd.Series(self.test_results, name='Esperado')
-        predicted = pd.Series(self.test_predicted, name='   Obtido')
+        obtained = pd.Series(self.test_results, name='   Obtido')
+        predicted = pd.Series(self.test_predicted, name='Esperado')
         confusion_matrix = pd.crosstab(obtained, predicted)
         print(confusion_matrix)
 
