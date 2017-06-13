@@ -11,8 +11,7 @@ To run the program:
 - Set parameters on src/parameters.py
 - python3 databases.py (to generate the descriptors and store them)
 python3 src/cross-validation.py HOG/LBP (to run the program with 3 letters - S, X, Z using HOG or LBP)
-- optional parameter: part2
-python3 src/cross-validation.py HOG/LBP (to run the program with 26 letters - A to Z)
+- python3 src/cross-validation.py HOG/LBP part2 (to run the program with 26 letters - A to Z - optional parameter)
 
 
 by Laura Castro Vieira
