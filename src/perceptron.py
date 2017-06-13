@@ -380,7 +380,7 @@ class MLP(object):
             stop_condition = u.stop_condition(self.errors_test_list, epoch_current, self.alpha)
             if stop_condition['result']:
                 break
-            break
+
         self.get_confusion_matrix_and_accuracy(fold_num)
 
         # média total
