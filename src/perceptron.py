@@ -135,15 +135,60 @@ class MLP(object):
         self.config_f.write("rede_tecnica_ajuste_alpha: alpha - 0.001 para alpha maior que 0\n")
         
     def plot_graph(self, fold_num):
+        """Método para criacao do grafico de erros"""
         ax = plt.figure().gca()
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         plt.plot(self.errors_test_list)
         plt.plot(self.errors_training_list)
-        plt.ylabel('Error')
-        plt.xlabel('Epochs')
+        plt.ylabel('Erros')
+        plt.xlabel('Épocas')
         plt.savefig("output/error_graph_{}_{}_{}.jpg".format(fold_num, 
             self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
         plt.close()
+
+    def get_confusion_matrix_and_accuracy(self, fold_num):
+        """Método que calcula a matriz de confusao e a acuracia por classe"""
+        letters = u.get_classes_letters_list(self.part_2)
+
+        # obtencao das imagens da pasta testes daquele dataset para validacao
+        # funcao teste chamada para cada imagem, para adicionar os acertos na matriz de confusao posteriormente
+        parameters_test = p.get_parameters(self.descriptor, self.part_2)
+        dataset_validation = u.get_dataset_list(u.get_classes_list(parameters_test['testpath']), parameters_test['testpath'])
+        for dataset in dataset_validation:
+            self.num_tests_images_per_letter = len(dataset)
+            for image_i, image in enumerate(dataset):
+                self.testing(image, image_i, dataset_tests = True)
+
+        # matriz de confusão
+        obtained = pd.Series(self.test_results, name='Esperado')
+        predicted = pd.Series(self.test_predicted, name='   Obtido')
+        confusion_matrix = pd.crosstab(obtained, predicted)
+        print(confusion_matrix)
+
+        # plotar matriz de confusão com o uso das bibliotecas seaborn e pyplot
+        df_cm = pd.DataFrame(confusion_matrix, index = [i for i in letters],
+                  columns = [i for i in letters])
+        if self.part_2 == True:
+            plt.figure(figsize = (17,10))
+        else:
+            plt.figure(figsize = (10,7))
+        sn.heatmap(df_cm, annot=True, cmap='PuBu', fmt='g')
+        plt.ylabel('Esperado')
+        plt.xlabel('Obtido')
+        plt.savefig("output/confusion_matriz_{}_{}_{}.jpg".format(fold_num, 
+            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
+        plt.close()
+
+        # acuracia
+        accuracy = accuracy_score(obtained, predicted)
+        print("\nAcurácia média: {} \n".format(accuracy))
+
+        # acuracia por letra 
+        # calculada dividindo acertos (diagonal da matriz de confusao) pelo total de imagens que foram testadas daquela letra
+        for letter_i, letter in enumerate(letters):
+            positive = confusion_matrix[letter][letter]
+            total = self.num_tests_images_per_letter
+            print("Acurácia da classe {} :".format(letter), positive/total)
 
     def training(self, image_name, image_i, epoch, fold_num):
         """Método de treinamento da rede"""
@@ -260,45 +305,6 @@ class MLP(object):
         np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
         print("\n")
 
-    def get_confusion_matrix_and_accuracy(self, fold_num):
-        letters = u.get_classes_letters_list(self.part_2)
-
-        # obtencao das imagens da pasta testes daquele dataset para validacao
-        # funcao teste chamada para cada imagem, para adicionar os acertos na matriz de confusao posteriormente
-        parameters_test = p.get_parameters(self.descriptor, self.part_2)
-        dataset_validation = u.get_dataset_list(u.get_classes_list(parameters_test['testpath']), parameters_test['testpath'])
-        for dataset in dataset_validation:
-            self.num_tests_images_per_letter = len(dataset)
-            for image_i, image in enumerate(dataset):
-                self.testing(image, image_i, dataset_tests = True)
-
-        # matriz de confusão
-        obtained = pd.Series(self.test_results, name='Esperado')
-        predicted = pd.Series(self.test_predicted, name='   Obtido')
-        confusion_matrix = pd.crosstab(obtained, predicted)
-
-        # plotar matriz de confusão com o uso da biblioteca seaborn
-        df_cm = pd.DataFrame(confusion_matrix, index = [i for i in letters],
-                  columns = [i for i in letters])
-        plt.figure(figsize = (10,7))
-        sn.heatmap(df_cm, annot=True, cmap='PuBu', fmt='g')
-        plt.ylabel('Esperado')
-        plt.xlabel('Obtido')
-        plt.savefig("output/confusion_matriz_{}_{}_{}.jpg".format(fold_num, 
-            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
-        plt.close()
-
-        # acuracia
-        accuracy = accuracy_score(obtained, predicted)
-        print("\nAcurácia média: {} \n".format(accuracy))
-
-        # acuracia por letra 
-        # calculada dividindo acertos (diagonal da matriz de confusao) pelo total de imagens que foram testadas daquela letra
-        for letter_i, letter in enumerate(letters):
-            positive = confusion_matrix[letter][letter]
-            total = self.num_tests_images_per_letter
-            print("Acurácia da classe {} :".format(letter), positive/total)
-
     def run(self, training_data, testing_data, fold_num):
         """Método principal de execução do multilayer perceptron"""
         fold_num = fold_num + 1
@@ -367,7 +373,7 @@ class MLP(object):
             stop_condition = u.stop_condition(self.errors_test_list, epoch_current, self.alpha)
             if stop_condition['result']:
                 break
-
+            break
         self.get_confusion_matrix_and_accuracy(fold_num)
 
         # média total
