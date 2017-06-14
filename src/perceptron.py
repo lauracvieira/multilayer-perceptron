@@ -396,4 +396,4 @@ class MLP(object):
 
         self.config_f.close()
         self.error_f.close()
-        u.plot_graph(fold_num)
+        u.plot_graph(fold_num, self.errors_test_list, self.errors_training_list)

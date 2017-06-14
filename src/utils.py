@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 from datetime import datetime
 from matplotlib.ticker import MaxNLocator
 import matplotlib as mpl
@@ -232,12 +233,13 @@ def get_resulting_letter(layer_2, part_2):
     else:
         return None
 
-def plot_graph(self, fold_num):
+
+def plot_graph(fold_num, errors_test_list, errors_training_list):
     """Função para criação do gráfico de erros"""
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    plt.plot(self.errors_test_list)
-    plt.plot(self.errors_training_list)
+    plt.plot(errors_test_list)
+    plt.plot(errors_training_list)
     plt.ylabel('Erros')
     plt.xlabel('Épocas')
     plt.savefig("output/error_graph_{}_{}_{}.jpg".format(fold_num,
