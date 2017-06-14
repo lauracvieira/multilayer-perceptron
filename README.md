@@ -18,16 +18,14 @@ Before running the program:</br>
 - pip install -U progressbar2
     # Scikit-Image
 - pip install -U scikit-image
-    # Scikit-Learn
-- pip install -U scikit-learn
     # Seaborn 
 - pip install -U seaborn
 
 To run the program:</br>
 - Set parameters on src/parameters.py
 - python3 databases.py (to generate the descriptors and store them)
-- python3 src/cross-validation.py HOG/LBP (to run the program with 3 letters - S, X, Z using HOG or LBP)
-- python3 src/cross-validation.py HOG/LBP part2 (to run the program with 26 letters - A to Z - optional parameter)
+- python3 src/cross-validation.py <em>HOG/LBP</em> (to run the program with 3 letters - S, X, Z using HOG or LBP)
+- python3 src/cross-validation.py <em>HOG/LBP part2</em> (to run the program with 26 letters - A to Z - optional parameter)
 
 </br>Authors:</br>
 Laura Castro Vieira</br>
