@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from matplotlib.ticker import MaxNLocator
 from sklearn.metrics import accuracy_score
 import utils as u
 import matplotlib.pyplot as plt
@@ -131,18 +130,6 @@ class MLP(object):
         self.config_f.write("rede_max_epocas: {}\n".format(self.epochs))
         self.config_f.write("rede_tecnica_ajuste_alpha: alpha - 0.001 para alpha maior que 0\n")
 
-    def plot_graph(self, fold_num):
-        """Método para criacao do grafico de erros"""
-        ax = plt.figure().gca()
-        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-        plt.plot(self.errors_test_list)
-        plt.plot(self.errors_training_list)
-        plt.ylabel('Erros')
-        plt.xlabel('Épocas')
-        plt.savefig("output/error_graph_{}_{}_{}.jpg".format(fold_num,
-                            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
-        plt.close()
-
     def get_confusion_matrix_and_accuracy(self, fold_num):
         """Método que calcula a matriz de confusao e a acuracia por classe"""
         letters = u.get_classes_letters_list(self.part_2)
@@ -153,6 +140,7 @@ class MLP(object):
         parameters_test = p.get_parameters(self.descriptor, self.part_2)
         dataset_validation = u.get_dataset_list(
             u.get_classes_list(parameters_test['testpath']), parameters_test['testpath'])
+
         for dataset in dataset_validation:
             self.num_tests_images_per_letter = len(dataset)
             for image_i, image in enumerate(dataset):
@@ -408,4 +396,4 @@ class MLP(object):
 
         self.config_f.close()
         self.error_f.close()
-        self.plot_graph(fold_num)
+        u.plot_graph(fold_num)
