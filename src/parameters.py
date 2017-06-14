@@ -25,7 +25,8 @@ __LBP_RADIUS = 8
 
 
 def get_parameters(descriptor, part_2):
-    """Retorna um dicionário contendo os parâmetros de configuração do algoritmo e dos descritores""" 
+    """Retorna um dicionário contendo os parâmetros de
+    configuração do algoritmo e dos descritores""" 
     if descriptor not in ['HOG', 'LBP']:
         return None
 
@@ -33,7 +34,7 @@ def get_parameters(descriptor, part_2):
 
     p['descriptor'] = descriptor
     p['epochs'] = __EPOCHS_MAX
-    p['alpha'] = __ALPHA 
+    p['alpha'] = __ALPHA
     p['part_2'] = part_2
     p['hidden_neurons'] = __HIDDEN_NEURONS_HOG if descriptor == 'HOG' else __HIDDEN_NEURONS_LBP
     p['descriptor_param_1'] = __HOG_ORIENTATIONS if descriptor == 'HOG' else __LBP_POINTS
@@ -42,18 +43,20 @@ def get_parameters(descriptor, part_2):
     p['workpath'] = './data/dataset{}/treinamento/'.format(2 if part_2 else 1)
     p['testpath'] = './data/dataset{}/testes/'.format(2 if part_2 else 1)
 
-
     return p
+
 
 def get_error_min():
     return __ERROR_MIN
 
+
 def get_epochs_min():
     return __EPOCHS_MIN
+
 
 def get_epochs_max():
     return __EPOCHS_MAX
 
+
 def get_alpha_min():
     return __ALPHA_MIN
-
