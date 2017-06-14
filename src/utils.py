@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from matplotlib.ticker import MaxNLocator
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
@@ -230,14 +232,14 @@ def get_resulting_letter(layer_2, part_2):
     else:
         return None
 
-    def plot_graph(self, fold_num):
-        """Função para criação do gráfico de erros"""
-        ax = plt.figure().gca()
-        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-        plt.plot(self.errors_test_list)
-        plt.plot(self.errors_training_list)
-        plt.ylabel('Erros')
-        plt.xlabel('Épocas')
-        plt.savefig("output/error_graph_{}_{}_{}.jpg".format(fold_num,
-                            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
-        plt.close()
+def plot_graph(self, fold_num):
+    """Função para criação do gráfico de erros"""
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    plt.plot(self.errors_test_list)
+    plt.plot(self.errors_training_list)
+    plt.ylabel('Erros')
+    plt.xlabel('Épocas')
+    plt.savefig("output/error_graph_{}_{}_{}.jpg".format(fold_num,
+                        self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
+    plt.close()
