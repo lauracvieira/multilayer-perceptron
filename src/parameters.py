@@ -19,14 +19,14 @@ __HOG_PIXELS_PER_CELL = 8
 __HOG_CELLS_PER_BLOCK = 1
 
 # lbp: parâmetros
-__HIDDEN_NEURONS_LBP= 160
+__HIDDEN_NEURONS_LBP = 160
 __LBP_POINTS = 24
 __LBP_RADIUS = 8
 
 
 def get_parameters(descriptor, part_2):
     """Retorna um dicionário contendo os parâmetros de
-    configuração do algoritmo e dos descritores""" 
+    configuração do algoritmo e dos descritores"""
     if descriptor not in ['HOG', 'LBP']:
         return None
 

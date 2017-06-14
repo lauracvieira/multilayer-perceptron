@@ -113,12 +113,9 @@ def get_output(image_name, part_2):
 
 def serialize_model(fold_num, weight_0, weight_1, start_algorithm, descriptor):
     """Serialiização dos pesos no arquivo output/model.dat"""
-    data = (weight_0, weight_1)
-    f = open(
-        '/output/model_{}_{}_{}.dat'.format(fold_num,
-start_algorithm.strftime("%d%m%Y-%H%M"), descriptor), "wb")
-    pickle.dump(data, f)
-    f.close()
+    with open('output/model_{}_{}_{}.dat'.format(fold_num,
+            start_algorithm.strftime("%d%m%Y-%H%M"), descriptor), "wb") as f:
+        pickle.dump((weight_0, weight_1), f)
 
 
 def initnw(inputs, outputs):
