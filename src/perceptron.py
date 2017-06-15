@@ -32,10 +32,6 @@ class MLP(object):
         # sera utilizada para calculo da acuracia (acertos/total)
         self.num_tests_images_per_letter = None
 
-        # bias
-        self.bias_0 = 1
-        self.bias_1 = 1
-
         # alpha
         self.alpha = parameters['alpha']
 
@@ -43,6 +39,13 @@ class MLP(object):
         self.l0_neurons = None
         self.l1_neurons = parameters['hidden_neurons']
         self.l2_neurons = classes_num
+
+        # bias
+        self.bias = parameters['bias']
+        self.bias_0 = [self.bias for e in range(self.l1_neurons)]
+        self.bias_0 = np.matrix(self.bias_0) # 1x32
+        self.bias_1 = [self.bias for e in range(self.l2_neurons)]
+        self.bias_1 = np.matrix(self.bias_1) #1x3
 
         # épocas
         self.epochs = parameters['epochs']
@@ -182,9 +185,6 @@ class MLP(object):
         mlp_input = None
         image = None
 
-        bias_0 = self.bias_0
-        bias_1 = self.bias_1
-
         try:
             self.cursor. execute(
                 'SELECT {} FROM treinamento WHERE image_name = "{}"'.format(self.descriptor,
@@ -206,38 +206,42 @@ class MLP(object):
         weights_0 = self.weights_0
         weights_1 = self.weights_1
 
+        #bias
+        bias_0 = self.bias_0
+        bias_1 = self.bias_1
+
         # feed forward
-        layer_0 = mlp_input
-        layer_1 = self.activFunction(np.dot(layer_0, weights_0) + bias_0)  # ->1x6 (1x576 por 576x6)
-        layer_2 = self.activFunction(np.dot(layer_1, weights_1) + bias_1).T  # ->1X3 (1x6 por 6x3)
-        y_error = (expected_output - layer_2)  # 3x1 - 1X3(T) = 1X3
+        layer_0 = mlp_input     #1x576 (HOG)
+        layer_1 = self.activFunction(np.dot(layer_0, weights_0) + bias_0)  # ->1x32 (1x576 por 576x32)
+        layer_2 = self.activFunction(np.dot(layer_1, weights_1) + bias_1).T  # ->1X3 (1x32 por 32x3) (T)-> 3x1
+        y_error = (expected_output - layer_2)  # 3x1 - 3x1 = 3x1
 
         # erro quadrático médio de uma imagem
-        avg_y_error = np.sum((y_error) ** 2) / 2
+        avg_y_error = np.sum(np.power(y_error, 2)) / 2
         self.error_training_avg = self.error_training_avg + avg_y_error
         self.training_number = self.training_number + 1
 
         # erros: segunda camada
-        y_error = y_error * self.derivative(layer_2)  # y_error = 3x1
-        y_error = y_error.T
-        y_delta = self.alpha * layer_1.T.dot(y_error)  # layer1 = 1x1 - y_error = 3x3
-        bias_0_delta = self.alpha * y_error
+        y_error = np.array(y_error) * self.derivative(np.array(layer_2))  # 3x1 (3x1 por 3x1)
+        y_error = y_error.T #1x3
+        y_delta = self.alpha * layer_1.T.dot(y_error)  # 32x3 (32x1 por 1x3)
+        bias_1_delta = self.alpha * y_error #1x3
 
         # erros: repasse para a camada escondida
-        z_error = y_error.dot(weights_1.T)
-        z_error = z_error * self.derivative(layer_1)
-        z_delta = self.alpha * layer_0.T.dot(z_error)
-        bias_1_delta = self.alpha * z_error
+        z_error = y_error.dot(weights_1.T) #1x32 (1x3 por 3x32)
+        z_error = z_error * self.derivative(np.array(layer_1))  #1x32 (1x32 por 1x32)
+        z_delta = self.alpha * layer_0.T.dot(z_error) #576x32 (576x1(HOG) por 1x32)
+        bias_0_delta = self.alpha * z_error
 
         # pesos e bias: atualização
         weights_1 += y_delta
         weights_0 += z_delta
-        bias_1 += bias_0_delta
-        bias_0 += bias_1_delta
+        bias_1_delta += bias_1
+        bias_0_delta += bias_0
         self.weights_1 = weights_1
         self.weights_0 = weights_0
-        self.bias_0 = bias_0
-        self.bias_1 = bias_1
+        self.bias_1 = bias_1_delta
+        self.bias_0 = bias_0_delta
 
         print('Fold: {}\tEpoch: {}\tTraining: {}'.format(fold_num, str(epoch).zfill(4),
            str(image_i + 1).zfill(4)))
@@ -248,6 +252,8 @@ class MLP(object):
         """Método de teste da rede"""
         mlp_input = None
         image = None
+
+        #bias
         bias_0 = self.bias_0
         bias_1 = self.bias_1
 
@@ -289,7 +295,7 @@ class MLP(object):
         y_error = (expected_output - layer_2)
 
         # erro quadrático médio da imagem
-        avg_y_error = np.sum((y_error) ** 2) / 2
+        avg_y_error = np.sum(np.power(y_error, 2)) / 2
         self.error_test_avg = self.error_test_avg + avg_y_error
         self.test_number = self.test_number + 1
 

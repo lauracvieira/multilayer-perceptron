@@ -7,6 +7,7 @@
 __EPOCHS_MAX = 500
 __EPOCHS_MIN = 10
 __ALPHA = 0.5
+__BIAS = 1
 
 # stop condition
 __ERROR_MIN = 0.015
@@ -35,6 +36,7 @@ def get_parameters(descriptor, part_2):
     p['descriptor'] = descriptor
     p['epochs'] = __EPOCHS_MAX
     p['alpha'] = __ALPHA
+    p['bias'] = __BIAS
     p['part_2'] = part_2
     p['hidden_neurons'] = __HIDDEN_NEURONS_HOG if descriptor == 'HOG' else __HIDDEN_NEURONS_LBP
     p['descriptor_param_1'] = __HOG_ORIENTATIONS if descriptor == 'HOG' else __LBP_POINTS
