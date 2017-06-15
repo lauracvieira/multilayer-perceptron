@@ -305,10 +305,10 @@ class MLP(object):
     def run(self, training_data, testing_data, fold_num):
         """Método principal de execução do multilayer perceptron"""
         fold_num = fold_num + 1
-        self.config_f = open("output/config_{}_{}_{}.txt".format(fold_num,
-            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor), "w")
-        self.error_f = open("output/error_{}_{}_{}.txt".format(fold_num,
-            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor), "w")
+        self.config_f = open("output/config_{}_{}_{}_{}.txt".format(fold_num,
+            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor, 2 if self.part_2 else 1), "w")
+        self.error_f = open("output/error_{}_{}_{}_{}.txt".format(fold_num,
+            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor, 2 if self.part_2 else 1), "w")
         self.config_write()
 
         # Torna aleatória a lista de arquivos para treinamento e teste
