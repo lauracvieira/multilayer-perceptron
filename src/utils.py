@@ -113,7 +113,7 @@ def get_output(image_name, part_2):
     return linha.T
 
 
-def serialize_model(fold_num, weight_0, weight_1, start_algorithm, descriptor):
+def serialize_model(fold_num, weight_0, weight_1, start_algorithm, descriptor, part_2):
     """Serialiização dos pesos no arquivo output/model.dat"""
     with open('output/model_{}_{}_{}_{}.dat'.format(fold_num,
             start_algorithm.strftime("%d%m%Y-%H%M"), descriptor, 2 if part_2 else 1), "wb") as f:
