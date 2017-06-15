@@ -18,6 +18,8 @@ Before running the program:</br>
 - pip install -U progressbar2
     # Scikit-Image
 - pip install -U scikit-image
+    # Scikit-Learn
+- pip install -U scikit-learn
     # Seaborn 
 - pip install -U seaborn
 
