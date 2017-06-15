@@ -334,7 +334,7 @@ class MLP(object):
 
             # serialização dos pesos desta época (model.dat)
             u.serialize_model(fold_num, self.weights_0, self.weights_1,
-                self.start_algorithm, self.descriptor)
+                self.start_algorithm, self.descriptor, self.part_2)
 
             # teste de 1/5 do fold
             # u.print_title_epoch(epoch_current + 1, fold_num,
