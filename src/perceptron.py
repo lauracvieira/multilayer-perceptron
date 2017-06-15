@@ -43,9 +43,9 @@ class MLP(object):
         # bias
         self.bias = parameters['bias']
         self.bias_0 = [self.bias for e in range(self.l1_neurons)]
-        self.bias_0 = np.matrix(self.bias_0) # 1x32
+        self.bias_0 = np.matrix(self.bias_0)  # 1x32
         self.bias_1 = [self.bias for e in range(self.l2_neurons)]
-        self.bias_1 = np.matrix(self.bias_1) #1x3
+        self.bias_1 = np.matrix(self.bias_1)  # 1x3
 
         # épocas
         self.epochs = parameters['epochs']
@@ -140,7 +140,7 @@ class MLP(object):
         # obtenção das imagens do diretório de testes do dataset
         # função teste chamada para cada imagem
         # para adicionar os acertos na matriz de confusao posteriormente
-        parameters_test = p.get_parameters(self.descriptor, self.part_2)
+        parameters_test = p.get_parameters(self.descriptor, self.part_2, self.l1_neurons)
         dataset_validation = u.get_dataset_list(
             u.get_classes_list(parameters_test['testpath']), parameters_test['testpath'])
 
@@ -163,8 +163,8 @@ class MLP(object):
         else:
             plt.figure(figsize=(10, 7))
         sn.heatmap(df_cm, annot=True, cmap='PuBu', fmt='g')
-        plt.ylabel('Esperado')
-        plt.xlabel('Obtido')
+        plt.ylabel('Obtido')
+        plt.xlabel('Esperado')
         plt.savefig("output/confusion_matriz_{}_{}_{}.jpg".format(fold_num,
             self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
         plt.close()
@@ -206,12 +206,12 @@ class MLP(object):
         weights_0 = self.weights_0
         weights_1 = self.weights_1
 
-        #bias
+        # bias
         bias_0 = self.bias_0
         bias_1 = self.bias_1
 
         # feed forward
-        layer_0 = mlp_input     #1x576 (HOG)
+        layer_0 = mlp_input  # 1x576 (HOG)
         layer_1 = self.activFunction(np.dot(layer_0, weights_0) + bias_0)  # ->1x32 (1x576 por 576x32)
         layer_2 = self.activFunction(np.dot(layer_1, weights_1) + bias_1).T  # ->1X3 (1x32 por 32x3) (T)-> 3x1
         y_error = (expected_output - layer_2)  # 3x1 - 3x1 = 3x1
@@ -223,14 +223,14 @@ class MLP(object):
 
         # erros: segunda camada
         y_error = np.array(y_error) * self.derivative(np.array(layer_2))  # 3x1 (3x1 por 3x1)
-        y_error = y_error.T #1x3
+        y_error = y_error.T  # 1x3
         y_delta = self.alpha * layer_1.T.dot(y_error)  # 32x3 (32x1 por 1x3)
-        bias_1_delta = self.alpha * y_error #1x3
+        bias_1_delta = self.alpha * y_error  # 1x3
 
         # erros: repasse para a camada escondida
-        z_error = y_error.dot(weights_1.T) #1x32 (1x3 por 3x32)
-        z_error = z_error * self.derivative(np.array(layer_1))  #1x32 (1x32 por 1x32)
-        z_delta = self.alpha * layer_0.T.dot(z_error) #576x32 (576x1(HOG) por 1x32)
+        z_error = y_error.dot(weights_1.T)  # 1x32 (1x3 por 3x32)
+        z_error = z_error * self.derivative(np.array(layer_1))   # 1x32 (1x32 por 1x32)
+        z_delta = self.alpha * layer_0.T.dot(z_error)  # 576x32 (576x1(HOG) por 1x32)
         bias_0_delta = self.alpha * z_error
 
         # pesos e bias: atualização
@@ -243,17 +243,17 @@ class MLP(object):
         self.bias_1 = bias_1_delta
         self.bias_0 = bias_0_delta
 
-        print('Fold: {}\tEpoch: {}\tTraining: {}'.format(fold_num, str(epoch).zfill(4),
-           str(image_i + 1).zfill(4)))
-        np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
-        print("\n")
+        # print('Fold: {}\tEpoch: {}\tTraining: {}'.format(fold_num, str(epoch).zfill(4),
+        #    str(image_i + 1).zfill(4)))
+        # np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
+        # print("\n")
 
     def testing(self, image_name, image_i, dataset_tests=False):
         """Método de teste da rede"""
         mlp_input = None
         image = None
 
-        #bias
+        # bias
         bias_0 = self.bias_0
         bias_1 = self.bias_1
 
@@ -277,8 +277,8 @@ class MLP(object):
         self.l0_neurons = len(mlp_input)
         expected_output = np.array(u.get_output(image_name, self.part_2))
 
-        print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4),
-            u.get_letter(image_name, self.part_2)))
+        # print ("Test: {}\tImage: {}".format(str(image_i + 1).zfill(4),
+        #     u.get_letter(image_name, self.part_2)))
         layer_0 = mlp_input
         layer_1 = self.activFunction(np.dot(layer_0, self.weights_0) + bias_0)
         layer_2 = self.activFunction(np.dot(layer_1, self.weights_1) + bias_1).T
@@ -299,8 +299,8 @@ class MLP(object):
         self.error_test_avg = self.error_test_avg + avg_y_error
         self.test_number = self.test_number + 1
 
-        np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
-        print("\n")
+        # np.savetxt(sys.stdout.buffer, layer_2, '%.10f')
+        # print("\n")
 
     def run(self, training_data, testing_data, fold_num):
         """Método principal de execução do multilayer perceptron"""
@@ -337,8 +337,8 @@ class MLP(object):
                 self.start_algorithm, self.descriptor)
 
             # teste de 1/5 do fold
-            u.print_title_epoch(epoch_current + 1, fold_num,
-                'testing', self.part_2, self.descriptor)
+            # u.print_title_epoch(epoch_current + 1, fold_num,
+            #     'testing', self.part_2, self.descriptor)
 
             for image_i, image in enumerate(testing_data):
                 self.testing(image, image_i)

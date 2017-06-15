@@ -15,9 +15,9 @@ def get_descriptor():
         exit()
 
     elif 'HOG' in sys.argv:
-        return 'HOG'
+        return ('HOG', sys.argv[2] if type(sys.argv[2]) == 'int' else None)
     elif 'LBP' in sys.argv:
-        return 'LBP'
+        return ('LBP', sys.argv[2] if type(sys.argv[2]) == 'int' else None)
     else:
         print("O descritor deve ser passado em linha de comando e pode ser apenas 'HOG' ou 'LBP'.")
         exit()
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # horário de execução, descritor, parâmetros, diretórios, lista de classes e lista de dataset
     start_algorithm = datetime.now()
     descriptor = get_descriptor()
-    parameters = p.get_parameters(descriptor, 'part2' in sys.argv)
+    parameters = p.get_parameters(descriptor[0], 'part2' in sys.argv, descriptor[1])
     u.create_directories(['data', 'src', 'output'])
     dataset = u.get_dataset_list(u.get_classes_list(parameters['workpath']), parameters['workpath'])
     k_fold(dataset, len(dataset), parameters, start_algorithm)
