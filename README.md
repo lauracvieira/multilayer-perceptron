@@ -27,8 +27,8 @@ To run the program:</br>
 - python3 src/cross-validation.py <em>HOG/LBP</em> (to run the program with 3 letters - S, X, Z using HOG or LBP)
 - python3 src/cross-validation.py <em>HOG/LBP part2</em> (to run the program with 26 letters - A to Z - optional parameter)
 
-</br>Authors:</br>
+</br><b>Authors:</b></br>
 Laura Castro Vieira</br>
-<b>Rafael Bortman</b></br>
+Rafael Bortman</br>
 Virgílio Fernandes Junior</br>
  
