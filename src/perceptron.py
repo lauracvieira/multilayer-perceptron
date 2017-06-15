@@ -131,7 +131,7 @@ class MLP(object):
         self.config_f.write("rede_camada_0_funcao_ativacao: sigmoide\n")
         self.config_f.write("rede_inicializacao_pesos: nguyen-widrow\n")
         self.config_f.write("rede_max_epocas: {}\n".format(self.epochs))
-        self.config_f.write("rede_tecnica_ajuste_alpha: alpha - 0.001 para alpha maior que 0\n")
+        self.config_f.write("rede_tecnica_ajuste_alpha: 0.9 * self.alpha para alpha maior que 0.001\n")
 
     def get_confusion_matrix_and_accuracy(self, fold_num):
         """Método que calcula a matriz de confusao e a acuracia por classe"""
@@ -367,8 +367,8 @@ class MLP(object):
             self.training_number = 0
 
             # atualização da taxa de aprendizado e condição de parada por taxa de aprendizado
-            if self.alpha - 0.001 > 0:
-                self.alpha = self.alpha - 0.001
+            if self.alpha > 0.001:
+                self.alpha = 0.9 * self.alpha
 
             # condicao de parada por erro
             stop_condition = u.stop_condition(self.errors_test_list, epoch_current, self.alpha)
@@ -403,4 +403,4 @@ class MLP(object):
         self.config_f.close()
         self.error_f.close()
         u.plot_graph(fold_num, self.errors_test_list, self.errors_training_list,
-		self.descriptor, self.start_algorithm)
+         self.descriptor, self.start_algorithm)
