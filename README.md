@@ -23,7 +23,7 @@ Before running the program:</br>
     # Seaborn 
 - pip install -U seaborn
 
-To run the program:</br>
+</br><b>To run the program:</b></br>
 - Set parameters on src/parameters.py
 - python3 databases.py (to generate the descriptors and store them)
 - python3 src/cross-validation.py <em>HOG/LBP</em> (to run the program with 3 letters - S, X, Z using HOG or LBP)
