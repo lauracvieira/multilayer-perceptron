@@ -29,6 +29,6 @@ To run the program:</br>
 
 </br>Authors:</br>
 Laura Castro Vieira</br>
-Rafael Bortman</br>
+<b>Rafael Bortman</b></br>
 Virgílio Fernandes Junior</br>
  
