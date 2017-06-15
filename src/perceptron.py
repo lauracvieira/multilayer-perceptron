@@ -305,11 +305,19 @@ class MLP(object):
     def run(self, training_data, testing_data, fold_num):
         """Método principal de execução do multilayer perceptron"""
         fold_num = fold_num + 1
-        self.config_f = open("output/config_{}_{}_{}_{}.txt".format(fold_num,
-            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor, 2 if self.part_2 else 1), "w")
-        self.error_f = open("output/error_{}_{}_{}_{}.txt".format(fold_num,
-            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor, 2 if self.part_2 else 1), "w")
-        self.config_write()
+
+        files = ('config', 'error')
+
+        for file in files:
+            file_command = 'output/{file}-{desc}-N{hn:03}-P{part}-F{fold}-{datetime}.txt'.format(file=file,
+                fold=fold_num, datetime=self.start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
+                desc=self.descriptor, part=2 if self.part_2 else 1, hn=self.l1_neurons)
+
+            if file == 'config':
+                self.config_f = open(file_command, "w")
+                self.config_write()
+            elif file == 'error':
+                self.error_f = open(file_command, "w")
 
         # Torna aleatória a lista de arquivos para treinamento e teste
         random.shuffle(training_data)
@@ -334,7 +342,7 @@ class MLP(object):
 
             # serialização dos pesos desta época (model.dat)
             u.serialize_model(fold_num, self.weights_0, self.weights_1,
-                self.start_algorithm, self.descriptor, self.part_2)
+                self.start_algorithm, self.descriptor, self.part_2, self.l1_neurons)
 
             # teste de 1/5 do fold
             # u.print_title_epoch(epoch_current + 1, fold_num,
