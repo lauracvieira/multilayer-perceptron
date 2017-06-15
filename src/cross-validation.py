@@ -58,9 +58,9 @@ if __name__ == "__main__":
     u.create_directories(['data', 'src', 'output'])
     dataset = u.get_dataset_list(u.get_classes_list(parameters['workpath']), parameters['workpath'])
     k_fold(dataset, len(dataset), parameters, start_algorithm)
-    print("Main Start Time:   \t\t\t\t\t\t\t{}".format(
+    print("Main Start Time:   \t\t\t\t\t\t{}".format(
         start_algorithm.strftime("%Y-%m-%d %H:%M:%S")))
     print("Main End Time:      \t\t\t\t\t\t{}".format(
         datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    print("Total time running: \t\t\t\t\t{}\n".format(
+    print("Total time running: \t\t\t\t\t\t{}\n".format(
         datetime.now() - start_algorithm))

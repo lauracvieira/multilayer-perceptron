@@ -234,7 +234,7 @@ def get_resulting_letter(layer_2, part_2):
         return None
 
 
-def plot_graph(fold_num, errors_test_list, errors_training_list):
+def plot_graph(fold_num, errors_test_list, errors_training_list, descriptor, start_algorithm):
     """Função para criação do gráfico de erros"""
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
@@ -243,5 +243,5 @@ def plot_graph(fold_num, errors_test_list, errors_training_list):
     plt.ylabel('Erros')
     plt.xlabel('Épocas')
     plt.savefig("output/error_graph_{}_{}_{}.jpg".format(fold_num,
-                        self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
+                        start_algorithm.strftime("%d%m%Y-%H%M"), descriptor))
     plt.close()
