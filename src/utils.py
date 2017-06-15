@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
 from matplotlib.ticker import MaxNLocator
 import matplotlib as mpl
 mpl.use('Agg')
@@ -17,7 +16,7 @@ def create_directories(directories):
     for directory in directories:
         try:
             os.stat('./' + directory)
-        except OSerror:
+        except OSError:
             os.mkdir('./' + directory)
 
 
