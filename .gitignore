@@ -4,3 +4,5 @@ results/
 output/
 data/
 src/__pycache__/
+multilayer-perceptron.sublime-project
+multilayer-perceptron.sublime-workspace

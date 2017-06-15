@@ -322,8 +322,8 @@ class MLP(object):
             self.start_fold.strftime("%Y-%m-%d %H:%M:%S")))
 
         for epoch_current in range(self.epochs):
-            u.print_title_epoch(epoch_current + 1, fold_num, 'training',
-                self.part_2, self.descriptor)
+            # u.print_title_epoch(epoch_current + 1, fold_num, 'training',
+            #     self.part_2, self.descriptor)
 
             # treinamento de 4/5 do fold
             for image_i, image in enumerate(training_data):
