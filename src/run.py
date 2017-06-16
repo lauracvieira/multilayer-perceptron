@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     for i, e in enumerate(executions):
         command = 'python3 src/cross-validation.py '
-        command += '{desc} {neurons:3} {p_arg:5} > ./output/{desc}-N{hn:03}-P{part}-{datetime}_{count:02}.txt &'.format(
+        command += '{desc} {neurons:3} {p_arg:5} > ./output/{desc}-N{hn:03}-P{part}-log-{datetime}_{count:02}.txt &'.format(
             desc=e[0], neurons=e[1], p_arg=e[2], part=2 if e[2] == 'part2' else 1,
             datetime=start.strftime('%Y-%m-%d-%H-%M'), count=hog_count if e[0] == 'HOG' else lbp_count,
             hn=int(e[1]))
