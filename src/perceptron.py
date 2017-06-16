@@ -165,8 +165,12 @@ class MLP(object):
         sn.heatmap(df_cm, annot=True, cmap='PuBu', fmt='g')
         plt.ylabel('Obtido')
         plt.xlabel('Esperado')
-        plt.savefig("output/confusion_matriz_{}_{}_{}.jpg".format(fold_num,
-            self.start_algorithm.strftime("%d%m%Y-%H%M"), self.descriptor))
+
+        file_command = 'output/confusion_matrix-{desc}-N{hn:03}-P{part}-F{fold}-{datetime}.jpg'.format(
+            fold=fold_num, datetime=self.start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
+            desc=self.descriptor, part=2 if self.part_2 else 1, hn=self.l1_neurons)
+
+        plt.savefig(file_command)
         plt.close()
 
         # acuracia
@@ -411,4 +415,4 @@ class MLP(object):
         self.config_f.close()
         self.error_f.close()
         u.plot_graph(fold_num, self.errors_test_list, self.errors_training_list,
-         self.descriptor, self.start_algorithm)
+         self.descriptor, self.start_algorithm, self.l1_neurons)

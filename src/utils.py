@@ -237,7 +237,7 @@ def get_resulting_letter(layer_2, part_2):
         return None
 
 
-def plot_graph(fold_num, errors_test_list, errors_training_list, descriptor, start_algorithm):
+def plot_graph(fold_num, errors_test_list, errors_training_list, descriptor, start_algorithm, l1_neurons):
     """Função para criação do gráfico de erros"""
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
@@ -245,6 +245,10 @@ def plot_graph(fold_num, errors_test_list, errors_training_list, descriptor, sta
     plt.plot(errors_training_list)
     plt.ylabel('Erros')
     plt.xlabel('Épocas')
-    plt.savefig("output/error_graph_{}_{}_{}.jpg".format(fold_num,
-                        start_algorithm.strftime("%d%m%Y-%H%M"), descriptor))
+
+    file_command = 'output/error_graph-{desc}-N{hn:03}-P{part}-F{fold}-{datetime}.jpg'.format(
+        fold=fold_num, datetime=start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
+        desc=descriptor, part=2 if part_2 else 1, hn=l1_neurons)
+
+    plt.savefig(file_command)
     plt.close()
