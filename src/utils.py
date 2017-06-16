@@ -237,7 +237,8 @@ def get_resulting_letter(layer_2, part_2):
         return None
 
 
-def plot_graph(fold_num, errors_test_list, errors_training_list, descriptor, start_algorithm, l1_neurons):
+def plot_graph(fold_num, errors_test_list, errors_training_list, descriptor, start_algorithm,
+l1_neurons, part_2):
     """Função para criação do gráfico de erros"""
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
