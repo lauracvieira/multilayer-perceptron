@@ -23,14 +23,13 @@ executions = [
 
 if __name__ == '__main__':
     start = datetime.now()
-    u.create_directories(['logs'])
     hog_count = 1
     lbp_count = 1
 
     for i, e in enumerate(executions):
-        command = 'python3.6 src/cross-validation.py '
-        command += '{desc} {neurons:3} {part:5} > ./logs/{desc}-N{hn:03}-P{pfile}-{datetime}_{count:02}.txt &'.format(
-            desc=e[0], neurons=e[1], part=e[2], pfile=2 if e[2] == 'part2' else 1,
+        command = 'python3 src/cross-validation.py '
+        command += '{desc} {neurons:3} {part:5} > ./output/{desc}-N{hn:03}-P{part}-{datetime}_{count:02}.txt &'.format(
+            desc=e[0], neurons=e[1], part=e[2], part=2 if e[2] == 'part2' else 1,
             datetime=start.strftime('%Y-%m-%d-%H-%M'), count=hog_count if e[0] == 'HOG' else lbp_count,
             hn=int(e[1]))
 

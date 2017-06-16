@@ -166,7 +166,7 @@ class MLP(object):
         plt.ylabel('Obtido')
         plt.xlabel('Esperado')
 
-        file_command = 'output/confusion_matrix-{desc}-N{hn:03}-P{part}-F{fold}-{datetime}.jpg'.format(
+        file_command = 'output/{desc}-N{hn:03}-P{part}-confusion_matrix-F{fold}-{datetime}.jpg'.format(
             fold=fold_num, datetime=self.start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
             desc=self.descriptor, part=2 if self.part_2 else 1, hn=self.l1_neurons)
 
@@ -313,7 +313,7 @@ class MLP(object):
         files = ('config', 'error')
 
         for file in files:
-            file_command = 'output/{file}-{desc}-N{hn:03}-P{part}-F{fold}-{datetime}.txt'.format(file=file,
+            file_command = 'output/{desc}-N{hn:03}-P{part}-{file}-F{fold}-{datetime}.txt'.format(file=file,
                 fold=fold_num, datetime=self.start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
                 desc=self.descriptor, part=2 if self.part_2 else 1, hn=self.l1_neurons)
 
