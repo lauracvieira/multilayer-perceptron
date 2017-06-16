@@ -116,7 +116,7 @@ def get_output(image_name, part_2):
 def serialize_model(fold_num, weight_0, weight_1, start_algorithm,
 descriptor, part_2, l1_neurons):
     """Serialiização dos pesos no arquivo output/model.dat"""
-    file_command = 'output/{desc}-N{hn:03}-P{part}-model-F{fold}-{datetime}.txt'.format(fold=fold_num,
+    file_command = 'output/{desc}-N{hn:03}-P{part}-F{fold}-model-{datetime}.txt'.format(fold=fold_num,
         datetime=start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
         desc=descriptor, part=2 if part_2 else 1, hn=l1_neurons)
 
@@ -247,7 +247,7 @@ l1_neurons, part_2):
     plt.ylabel('Erros')
     plt.xlabel('Épocas')
 
-    file_command = 'output/{desc}-N{hn:03}-P{part}-error_graph-F{fold}-{datetime}.jpg'.format(
+    file_command = 'output/{desc}-N{hn:03}-P{part}-F{fold}-error_graph-{datetime}.jpg'.format(
         fold=fold_num, datetime=start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
         desc=descriptor, part=2 if part_2 else 1, hn=l1_neurons)
 
