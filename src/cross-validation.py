@@ -6,6 +6,7 @@ import utils as u
 import parameters as p
 import perceptron
 import sqlite3
+import threading
 import sys
 
 
@@ -37,6 +38,15 @@ def get_arguments():
         exit()
 
 
+def multithreading(classes_num, parameters, start_algorithm,
+training_this_round, testing_this_round, fold_i):
+    conn = sqlite3.connect('./data/database.db')
+    cursor = conn.cursor()
+    mlp = perceptron.MLP(classes_num, parameters, cursor, start_algorithm)
+    mlp.run(training_this_round, testing_this_round, fold_i)
+    conn.close()
+
+
 def k_fold(dataset, classes_num, parameters, start_algorithm):
     """Validação cruzada utilizando o método k-fold"""
     # definição do número de folds e tamanho do subset
@@ -44,10 +54,7 @@ def k_fold(dataset, classes_num, parameters, start_algorithm):
     num_folds = 5
     subset_size = int(len(dataset[0]) / num_folds)
 
-    # dataset_described = u.de_serialize_dataset(parameters['part_2'])
-
-    conn = sqlite3.connect('./data/database.db')
-    cursor = conn.cursor()
+    thread_list = []
 
     for fold_i in range(num_folds):
         testing_this_round = list()
@@ -58,9 +65,16 @@ def k_fold(dataset, classes_num, parameters, start_algorithm):
             training_this_round += dataset[dataset_j][:fold_i * subset_size] + \
                 dataset[dataset_j][(fold_i + 1) * subset_size:]
 
-        mlp = perceptron.MLP(classes_num, parameters, cursor, start_algorithm)
-        mlp.run(training_this_round, testing_this_round, fold_i)
-    conn.close()
+        t = threading.Thread(target=multithreading, args=(classes_num, parameters, start_algorithm,
+            training_this_round, testing_this_round, fold_i))
+        thread_list.append(t)
+
+    # Starts threads
+    for thread in thread_list:
+        thread.start()
+
+    for thread in thread_list:
+        thread.join()
 
 
 # início da execução
@@ -80,5 +94,3 @@ if __name__ == "__main__":
         datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     print("Total time running: \t\t\t\t\t\t{}\n".format(
         datetime.now() - start_algorithm))
-
-    
