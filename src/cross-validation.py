@@ -9,15 +9,29 @@ import sqlite3
 import sys
 
 
-def get_descriptor():
+def get_arguments():
     if 'HOG' in sys.argv and 'LBP' in sys.argv:
         print("Apenas um descritor pode ser passado como parâmetro. Escolha 'HOG' ou 'LBP'.")
         exit()
 
-    elif 'HOG' in sys.argv:
-        return ('HOG', sys.argv[2] if type(sys.argv[2]) == 'int' else None)
+    for arg in sys.argv:
+        if arg.startswith('output'):
+            output = arg
+            break
+
+    try:
+        neurons = int(sys.argv[2])
+    except TypeError:
+        neurons = None
+
+    arguments = {'neurons': neurons, 'output': output}
+
+    if 'HOG' in sys.argv:
+        arguments['descriptor'] = 'HOG'
+        return arguments
     elif 'LBP' in sys.argv:
-        return ('LBP', sys.argv[2] if type(sys.argv[2]) == 'int' else None)
+        arguments['descriptor'] = 'LBP'
+        return arguments
     else:
         print("O descritor deve ser passado em linha de comando e pode ser apenas 'HOG' ou 'LBP'.")
         exit()
@@ -53,8 +67,10 @@ def k_fold(dataset, classes_num, parameters, start_algorithm):
 if __name__ == "__main__":
     # horário de execução, descritor, parâmetros, diretórios, lista de classes e lista de dataset
     start_algorithm = datetime.now()
-    descriptor = get_descriptor()
-    parameters = p.get_parameters(descriptor[0], 'part2' in sys.argv, descriptor[1])
+    arguments = get_arguments()
+    parameters = p.get_parameters(arguments['descriptor'], 'part2' in sys.argv, arguments['neurons'],
+        arguments['output'])
+    print(parameters)
     u.create_directories(['data', 'src', 'output'])
     dataset = u.get_dataset_list(u.get_classes_list(parameters['workpath']), parameters['workpath'])
     k_fold(dataset, len(dataset), parameters, start_algorithm)

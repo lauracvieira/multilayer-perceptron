@@ -25,8 +25,9 @@ class MLP(object):
         self.start_fold = None
         self.end_fold = None
 
-        # diretório
+        # diretórios
         self.path = parameters['workpath']
+        self.output_directory = parameters['output']
 
         # quantidade de imagens correspondentes a cada letra na pasta 'testes'
         # sera utilizada para calculo da acuracia (acertos/total)
@@ -166,9 +167,8 @@ class MLP(object):
         plt.ylabel('Obtido')
         plt.xlabel('Esperado')
 
-        file_command = 'output/{desc}-N{hn:03}-P{part}-F{fold}-confusion_matrix-{datetime}.jpg'.format(
-            fold=fold_num, datetime=self.start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
-            desc=self.descriptor, part=2 if self.part_2 else 1, hn=self.l1_neurons)
+        file_command = '{output}confusion_matrix-{fold}.jpg'.format(fold=fold_num,
+            output=self.output_directory)
 
         plt.savefig(file_command)
         plt.close()
@@ -313,9 +313,8 @@ class MLP(object):
         files = ('config', 'error')
 
         for file in files:
-            file_command = 'output/{desc}-N{hn:03}-P{part}-F{fold}-{file}-{datetime}.txt'.format(file=file,
-                fold=fold_num, datetime=self.start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
-                desc=self.descriptor, part=2 if self.part_2 else 1, hn=self.l1_neurons)
+            file_command = '{output}{file}-{fold}.txt'.format(file=file, fold=fold_num,
+                output=self.output_directory)
 
             if file == 'config':
                 self.config_f = open(file_command, "w")
@@ -345,8 +344,7 @@ class MLP(object):
             self.error_training_avg = self.error_training_avg / self.training_number
 
             # serialização dos pesos desta época (model.dat)
-            u.serialize_model(fold_num, self.weights_0, self.weights_1,
-                self.start_algorithm, self.descriptor, self.part_2, self.l1_neurons)
+            u.serialize_model(fold_num, self.weights_0, self.weights_1, self.output_directory)
 
             # teste de 1/5 do fold
             # u.print_title_epoch(epoch_current + 1, fold_num,
@@ -414,5 +412,4 @@ class MLP(object):
 
         self.config_f.close()
         self.error_f.close()
-        u.plot_graph(fold_num, self.errors_test_list, self.errors_training_list,
-         self.descriptor, self.start_algorithm, self.l1_neurons, self.part_2)
+        u.plot_graph(fold_num, self.errors_test_list, self.errors_training_list, self.output_directory)

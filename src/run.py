@@ -2,46 +2,36 @@ from datetime import datetime
 import os
 import utils as u
 
+# Para cada caso de teste, insira uma tupla no formato (<descritor>, <neurônios>, <parte>), sendo:
+# <descritor>:    'HOG' ou 'LBP'
+# <neurônios>:    Número de neurônios na camada escondida
+# <parte>:            'part2' se for a parte 2, se for a parte, apenas '' (dois apóstrofos)
+
+# Exemplo:
+# executions = [
+#     # ('HOG', '32', '')               <- HOG, 32 neurônios, parte 1
+#     # ('LBP', '160', 'part2')    <- LBP, 160 neurônios, parte 2
+# ]
+# O número de tuplas de teste é ilimitado, então use de acordo com sua necessidade.
+# Ao definir todos os casos, execute no terminal: python3 src/run.py
+
 executions = [
-    ('HOG', '32', ''),  # necessário para comparação com  a primeira fase
-    ('LBP', '160', ''),  # necessário para comparação com primeira fase
-    ('HOG', '32', 'part2'),  # necessário para comparação com  a primeira fase
-    ('LBP', '160', 'part2'),  # necessário para comparação com primeira fase
-    ('HOG', '40', 'part2'),
-    ('LBP', '200', 'part2'),
-    ('HOG', '50', 'part2'),
-    ('LBP', '240', 'part2'),
-    ('HOG', '60', 'part2'),
-    ('LBP', '280', 'part2'),
-    ('HOG', '70', 'part2'),
-    ('LBP', '320', 'part2'),
-    ('HOG', '80', 'part2'),
-    ('LBP', '360', 'part2'),
-    ('HOG', '100', 'part2'),
-    ('LBP', '400', 'part2')
+    ('HOG', '32', '') 
+    ('LBP', '160', '') 
 ]
 
 if __name__ == '__main__':
     start = datetime.now()
-    hog_count = 1
-    lbp_count = 1
 
-    for i, e in enumerate(executions):
+    for run_num, e in enumerate(executions):
         directory = 'output/{desc}-N{hn:03}-P{part}-{datetime}/'.format(
-            desc=e[0], neurons=e[1], p_arg=e[2], part=2 if e[2] == 'part2' else 1,
+            desc=e[0], neurons=e[1], part=2 if 'part2' in e else 1,
             datetime=start.strftime('%Y-%m-%d-%H-%M'), hn=int(e[1]))
 
-        u.create_directories([directory])
+        u.create_directories(['output', directory])
         command = 'python3.6 src/cross-validation.py '
-        command += '{desc} {neurons:3} {p_arg:5} > {directory}{desc}-N{hn:03}-P{part}-log-{datetime}_{count:02}.txt &'.format(
-            desc=e[0], neurons=e[1], p_arg=e[2], part=2 if e[2] == 'part2' else 1,
-            datetime=start.strftime('%Y-%m-%d-%H-%M'),
-            count=hog_count if e[0] == 'HOG' else lbp_count, hn=int(e[1]), directory=directory)
-
-        if e[0] == 'HOG':
-            hog_count += 1
-        else:
-            lbp_count += 1
+        command += '{desc} {neurons:3} {part:5} {directory} > {directory}log.txt &'.format(desc=e[0],
+            neurons=e[1], part=e[2], directory=directory)
 
         os.system(command)
-        print('{}. Running: {}'.format(str(i + 1).zfill(2), command))
+        print('{}. Running: {}'.format(str(run_num + 1).zfill(2), command))

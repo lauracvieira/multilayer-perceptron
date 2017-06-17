@@ -25,7 +25,7 @@ __LBP_POINTS = 24
 __LBP_RADIUS = 8
 
 
-def get_parameters(descriptor, part_2, hidden_neurons=None):
+def get_parameters(descriptor, part_2, hidden_neurons=None, output_directory=None):
     """Retorna um dicionário contendo os parâmetros de
     configuração do algoritmo e dos descritores"""
     if descriptor not in ['HOG', 'LBP']:
@@ -49,6 +49,7 @@ def get_parameters(descriptor, part_2, hidden_neurons=None):
     p['descriptor_param_3'] = __HOG_CELLS_PER_BLOCK if descriptor == 'HOG' else 0
     p['workpath'] = './data/dataset{}/treinamento/'.format(2 if part_2 else 1)
     p['testpath'] = './data/dataset{}/testes/'.format(2 if part_2 else 1)
+    p['output'] = output_directory
 
     return p
 

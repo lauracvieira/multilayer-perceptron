@@ -113,12 +113,9 @@ def get_output(image_name, part_2):
     return linha.T
 
 
-def serialize_model(fold_num, weight_0, weight_1, start_algorithm,
-descriptor, part_2, l1_neurons):
+def serialize_model(fold_num, weight_0, weight_1, output_directory):
     """Serialiização dos pesos no arquivo output/model.dat"""
-    file_command = 'output/{desc}-N{hn:03}-P{part}-F{fold}-model-{datetime}.txt'.format(fold=fold_num,
-        datetime=start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
-        desc=descriptor, part=2 if part_2 else 1, hn=l1_neurons)
+    file_command = '{output}model-{fold}.dat'.format(fold=fold_num, output=output_directory)
 
     with open(file_command, 'wb') as f:
         pickle.dump((weight_0, weight_1), f)
@@ -237,8 +234,7 @@ def get_resulting_letter(layer_2, part_2):
         return None
 
 
-def plot_graph(fold_num, errors_test_list, errors_training_list, descriptor, start_algorithm,
-l1_neurons, part_2):
+def plot_graph(fold_num, errors_test_list, errors_training_list, output_directory):
     """Função para criação do gráfico de erros"""
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
@@ -246,10 +242,6 @@ l1_neurons, part_2):
     plt.plot(errors_training_list)
     plt.ylabel('Erros')
     plt.xlabel('Épocas')
-
-    file_command = 'output/{desc}-N{hn:03}-P{part}-F{fold}-error_graph-{datetime}.jpg'.format(
-        fold=fold_num, datetime=start_algorithm.strftime('%Y-%m-%d-%H-%M-%S.%f'),
-        desc=descriptor, part=2 if part_2 else 1, hn=l1_neurons)
-
+    file_command = '{output}error_graph-{fold}.jpg'.format(fold=fold_num, output=output_directory)
     plt.savefig(file_command)
     plt.close()
