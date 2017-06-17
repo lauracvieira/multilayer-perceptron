@@ -150,7 +150,7 @@ def stop_condition(error_list, epoch_current, alpha):
     """Aciona parada quando o erro for menor que o erro mínimo
         ou se o erro for crescente por 4 épocas consecutivas E tiver executado o número
         mínimo de épocas estipulado nos parâmetros"""
-    condition = {'result': 0}
+    condition = {'result': 0, 'message': ''}
 
     if len(error_list) < 4:
         return condition
@@ -231,16 +231,15 @@ def get_resulting_letter(layer_2, part_2):
     return get_letter_from_num(greatest_row, part_2)
 
 
-
 def plot_graph(fold_num, errors_test_list, errors_training_list, output_directory):
     """Função para criação do gráfico de erros"""
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    plt.plot(errors_test_list)
-    plt.plot(errors_training_list)
+    test_plot = plt.plot(errors_test_list, label='Teste')
+    training_plot = plt.plot(errors_training_list, label='Treinamento')
+    plt.legend()
     plt.ylabel('Erros')
     plt.xlabel('Épocas')
     file_command = '{output}error_graph-{fold}.jpg'.format(fold=fold_num, output=output_directory)
     plt.savefig(file_command)
     plt.close()
-
