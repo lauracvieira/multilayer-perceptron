@@ -7,7 +7,7 @@ Multilayer Perceptron to recognize characters using:</br>
 - SQLite to store the image descriptors
 
 Before running the program:</br>
-- Install <strong>Python 3</strong> and the following packages:</br>
+- Install <strong>Python 3</strong> and the following packages*:</br>
     # MatPlotLib
 - pip install -U matplotlib
     # Numpy
@@ -22,6 +22,8 @@ Before running the program:</br>
 - pip install -U scikit-learn
     # Seaborn 
 - pip install -U seaborn
+
+*For Ubuntu, some packages have to be installed via apt get.
 
 </br><b>To run the program:</b></br>
 - Set parameters on src/parameters.py
