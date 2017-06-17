@@ -80,3 +80,5 @@ if __name__ == "__main__":
         datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
     print("Total time running: \t\t\t\t\t\t{}\n".format(
         datetime.now() - start_algorithm))
+
+    

@@ -68,3 +68,5 @@ def get_epochs_max():
 
 def get_alpha_min():
     return __ALPHA_MIN
+
+    

@@ -35,3 +35,4 @@ if __name__ == '__main__':
 
         os.system(command)
         print('{}. Running: {}'.format(str(run_num + 1).zfill(2), command))
+

@@ -245,3 +245,4 @@ def plot_graph(fold_num, errors_test_list, errors_training_list, output_director
     file_command = '{output}error_graph-{fold}.jpg'.format(fold=fold_num, output=output_directory)
     plt.savefig(file_command)
     plt.close()
+
