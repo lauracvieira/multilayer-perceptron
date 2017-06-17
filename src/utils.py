@@ -228,10 +228,8 @@ def get_resulting_letter(layer_2, part_2):
             greatest_output = layer_2[row][0]
             greatest_row = row
 
-    if greatest_output > 0.1:
-        return get_letter_from_num(greatest_row, part_2)
-    else:
-        return None
+    return get_letter_from_num(greatest_row, part_2)
+
 
 
 def plot_graph(fold_num, errors_test_list, errors_training_list, output_directory):

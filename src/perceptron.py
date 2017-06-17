@@ -291,9 +291,8 @@ class MLP(object):
         # armazena os acertos e erros para a matriz de confusao
         if dataset_tests:
             resulting_letter = u.get_resulting_letter(layer_2, self.part_2)
-            if resulting_letter is not None:
-                self.test_predicted.append(u.get_letter(image_name, self.part_2))
-                self.test_results.append(resulting_letter)
+            self.test_predicted.append(u.get_letter(image_name, self.part_2))
+            self.test_results.append(resulting_letter)
 
         # erros: segunda camada
         y_error = (expected_output - layer_2)
