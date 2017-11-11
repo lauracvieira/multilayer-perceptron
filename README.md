@@ -6,33 +6,17 @@ Multilayer Perceptron to recognize characters using:</br>
 - PyPlot as image plotter (from MatPlotLib package)
 - SQLite to store the image descriptors
 
-Before running the program:</br>
-- Install <strong>Python 3</strong> and the following packages*:</br>
-    # MatPlotLib
-- pip install -U matplotlib
-    # Numpy
-- pip install -U numpy
-    # Pandas
-- pip install -U pandas
-    # ProgressBar
-- pip install -U progressbar2
-    # Scikit-Image
-- pip install -U scikit-image
-    # Scikit-Learn
-- pip install -U scikit-learn
-    # Seaborn 
-- pip install -U seaborn
+# Before running the program
+- Install <strong>Python 3</strong>, then:</br>
+- pip install -r requirements.txt (we recommend you to use virtualenv)
 
-*For Ubuntu, some packages have to be installed via apt get.
-
-</br><b>To run the program:</b></br>
+# To run the program:
 - Set parameters on src/parameters.py
-- python3 databases.py (to generate the descriptors and store them)
-- python3 src/cross-validation.py <em>HOG/LBP</em> (to run the program with 3 letters - S, X, Z using HOG or LBP)
-- python3 src/cross-validation.py <em>HOG/LBP part2</em> (to run the program with 26 letters - A to Z - optional parameter)
+- Read instructions at src/run.py
+- python3 src/run.py
 
-</br><b>Authors:</b></br>
+# Authors:
 Laura Castro Vieira</br>
 Rafael Bortman</br>
-Virgílio Fernandes Junior</br>
+Virgílio Fernandes Jr.</br>
  
